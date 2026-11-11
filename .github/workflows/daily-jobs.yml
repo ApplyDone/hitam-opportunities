@@ -1,0 +1,55 @@
+# Collects real internships and fresher jobs every morning, rebuilds the site,
+# and publishes it to GitHub Pages. Runs at 07:00 IST (01:30 UTC).
+name: Daily jobs
+
+on:
+  schedule:
+    - cron: '30 1 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: daily-jobs
+  cancel-in-progress: false
+
+jobs:
+  collect-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Test
+        run: node --test tests/*.test.js
+
+      - name: Collect jobs
+        run: node ingest/run.js
+
+      - name: Build site
+        run: node build.js
+
+      - name: Save today's data
+        run: |
+          git config user.name "hitam-opportunities-bot"
+          git config user.email "hitam-opportunities-bot@users.noreply.github.com"
+          git add data/jobs.json data/seen.json data/digest.txt data/campus.json
+          git diff --cached --quiet || git commit -m "chore: daily jobs $(date -u +%F)"
+          git push
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4

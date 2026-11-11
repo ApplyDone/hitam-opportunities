@@ -1,0 +1,35 @@
+rules_version = '2';
+
+// Only verified @hitam.org Google accounts can read or write anything.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isHitam() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.matches('^[^@]+@hitam[.]org$');
+    }
+
+    // Each student's own profile, applications and settings. Private to them.
+    match /users/{uid} {
+      allow read, delete: if isHitam() && request.auth.uid == uid;
+      allow create, update: if isHitam() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['profile', 'apps', 'weights', 'filters', 'views', 'updatedAt']);
+    }
+
+    // Shared campus board: any HITAM student can read and post; only the author can delete.
+    match /notices/{id} {
+      allow read: if isHitam();
+      allow create: if isHitam()
+        && request.resource.data.by == request.auth.uid
+        && request.resource.data.keys().hasOnly(['type', 'title', 'org', 'deadline', 'br', 'years', 'minCgpa', 'mode', 'pay', 'skills', 'applyUrl', 'desc', 'by', 'byName', 'createdAt'])
+        && request.resource.data.title is string && request.resource.data.title.size() > 2 && request.resource.data.title.size() <= 90
+        && request.resource.data.org is string && request.resource.data.org.size() <= 60
+        && request.resource.data.deadline is string && request.resource.data.deadline.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && (!('desc' in request.resource.data) || request.resource.data.desc.size() <= 1200)
+        && (!('applyUrl' in request.resource.data) || request.resource.data.applyUrl.matches('^https?://.*'));
+      allow update: if false;
+      allow delete: if isHitam() && resource.data.by == request.auth.uid;
+    }
+  }
+}
