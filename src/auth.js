@@ -26,16 +26,28 @@ async function loadFirebase() {
   for (const [src, sri] of FB_LIBS) await loadScript({ src, sri }); // sequential: app must load first
 }
 
-function setUser(u, onChange) {
+async function sha256Hex(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+/* The admin's personal Google account. Only a hash ships in the page; firestore.rules enforce the real check. */
+async function isAdminEmail(email) {
+  if (!APP_CONFIG.adminHash || !email || !window.crypto || !crypto.subtle) return false;
+  try { return (await sha256Hex(String(email).trim().toLowerCase())) === APP_CONFIG.adminHash; } catch (err) { return false; }
+}
+const isAdmin = () => Boolean(AUTH.user && AUTH.user.admin);
+
+async function setUser(u, onChange) {
   if (!u) { AUTH.user = null; AUTH.state = 'signedout'; onChange(); return; }
-  if (!u.emailVerified || !isHitamEmail(u.email)) {
+  const admin = u.emailVerified && await isAdminEmail(u.email);
+  if (!u.emailVerified || (!isHitamEmail(u.email) && !admin)) {
     AUTH.state = 'denied';
     AUTH.error = `${u.email || 'That account'} is not a HITAM account. Use your @hitam.org email.`;
     firebase.auth().signOut();
     onChange();
     return;
   }
-  AUTH.user = { uid: u.uid, email: u.email, name: u.displayName || '', photo: u.photoURL || '' };
+  AUTH.user = { uid: u.uid, email: u.email, name: u.displayName || '', photo: u.photoURL || '', admin };
   AUTH.state = 'signedin';
   AUTH.error = '';
   onChange();
@@ -55,9 +67,9 @@ async function initAuth(onChange) {
   }
 }
 
-async function signInWithHitam() {
+async function signInWithHitam(asAdmin = false) {
   const provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({ hd: APP_CONFIG.allowedDomain, prompt: 'select_account' });
+  provider.setCustomParameters(asAdmin ? { prompt: 'select_account' } : { hd: APP_CONFIG.allowedDomain, prompt: 'select_account' });
   AUTH.error = '';
   try {
     await firebase.auth().signInWithPopup(provider);
@@ -82,7 +94,7 @@ function startPreview() {
 }
 
 /* ---------- Cloud sync (signed-in only) ---------- */
-const CLOUD = { timer: null, unsub: null, loaded: false };
+const CLOUD = { timer: null, unsub: null, cdcUnsub: [], loaded: false };
 const SYNC_KEYS = ['profile', 'apps', 'weights', 'filters', 'views'];
 const db = () => firebase.firestore();
 const userDoc = () => db().collection('users').doc(AUTH.user.uid);
@@ -137,7 +149,28 @@ async function publishNotice(o) {
 }
 const deleteNotice = docId => db().collection('notices').doc(docId).delete();
 
+/* ---------- CDC data published by the admin: cdc/{opps|projects|portals|tracks} = { items, count, updatedAt, by } ---------- */
+let CDC = { opps: [], projects: [], portals: [], tracks: [], times: {} };
+function setCdcData(kind, items, at) {
+  if (!CDC_KINDS.includes(kind) || !Array.isArray(items)) return;
+  const clean = kind === 'opps' ? items.map(cdcItemToOpp).filter(Boolean) : items.filter(x => x && typeof x === 'object').slice(0, 1000);
+  CDC = { ...CDC, [kind]: clean, times: { ...CDC.times, [kind]: at || null } };
+}
+function subscribeCdc(onUpdate) {
+  CLOUD.cdcUnsub = CDC_KINDS.map(kind => db().collection('cdc').doc(kind).onSnapshot(snap => {
+    const d = snap.exists ? snap.data() : null;
+    setCdcData(kind, d && Array.isArray(d.items) ? d.items : [], d && d.updatedAt && d.updatedAt.toDate ? d.updatedAt.toDate().toISOString() : null);
+    onUpdate();
+  }, () => { /* not allowed or offline: keep what we have */ }));
+}
+/** Admin only (enforced by the rules). Replaces one CDC page with today's items. */
+async function publishCdc(kind, items) {
+  await db().collection('cdc').doc(kind).set({ items, count: items.length, by: AUTH.user.email, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+}
+
 function stopCloud() {
   if (CLOUD.unsub) CLOUD.unsub();
-  CLOUD.unsub = null; CLOUD.loaded = false; NOTICES = [];
+  CLOUD.cdcUnsub.forEach(f => f());
+  CLOUD.unsub = null; CLOUD.cdcUnsub = []; CLOUD.loaded = false; NOTICES = [];
+  CDC = { opps: [], projects: [], portals: [], tracks: [], times: {} };
 }

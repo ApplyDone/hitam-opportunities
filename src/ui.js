@@ -65,7 +65,7 @@ function dueBadge(r, o) {
   }
   return `<span class="due ${urgency(r.dl)}" title="${esc(countdownLong(r.dl))}">${countdown(r.dl)}</span>`;
 }
-const sourcePill = o => (o.live ? '<span class="pill live" title="From a live job posting">Live</span>' : o.program ? '<span class="pill ok" title="Official programme with a verified date">Official</span>' : o.custom || o.shared ? `<span class="pill acc" title="On the HITAM board">${o.tags && o.tags[0] === 'From CDC Explorer' ? 'CDC' : 'HITAM'}</span>` : '<span class="pill" title="Example listing shown in local preview only">Example</span>');
+const sourcePill = o => (o.live ? '<span class="pill live" title="From a live job posting">Live</span>' : o.program ? '<span class="pill ok" title="Official programme with a verified date">Official</span>' : o.cdc ? '<span class="pill acc" title="Verified by HITAM Career Development Centre">CDC</span>' : o.custom || o.shared ? `<span class="pill acc" title="On the HITAM board">${o.tags && o.tags[0] === 'From CDC Explorer' ? 'CDC' : 'HITAM'}</span>` : '<span class="pill" title="Example listing shown in local preview only">Example</span>');
 const applyBtn = (o, cls = 'btn sm acc') => (o.applyUrl ? `<a class="${cls}" href="${esc(o.applyUrl)}" target="_blank" rel="noopener noreferrer">Apply${icon('external')}</a>` : '');
 
 function skillTags(o, r, max = 4) {

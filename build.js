@@ -5,13 +5,15 @@ const path = require('node:path');
 
 const SRC = path.join(__dirname, 'src');
 const OUT_DIR = path.join(__dirname, 'dist');
-const ORDER = ['data.js', 'skills-dict.js', 'directory.js', 'engine.js', 'assistant.js', 'store.js', 'roll.js', 'config.js', 'auth.js', 'ui.js', 'views-home.js', 'views-explore.js', 'views-match.js', 'views-work.js', 'views-more.js', 'campus-info.js', 'cdc-import.js', 'notice.js', 'views-campus.js', 'views-opps.js', 'views-start.js', 'resume.js', 'views-resume.js', 'views-playbook.js', 'main.js'];
+const ORDER = ['data.js', 'skills-dict.js', 'directory.js', 'engine.js', 'assistant.js', 'store.js', 'roll.js', 'config.js', 'auth.js', 'ui.js', 'views-home.js', 'views-explore.js', 'views-match.js', 'views-work.js', 'views-more.js', 'campus-info.js', 'cdc-import.js', 'cdc-seed.js', 'notice.js', 'views-campus.js', 'views-opps.js', 'views-start.js', 'resume.js', 'views-resume.js', 'views-playbook.js', 'views-cdc.js', 'views-admin.js', 'main.js'];
 
 const read = f => fs.readFileSync(path.join(SRC, f), 'utf8');
 const css = read('theme.css');
 const CONFIG_FILE = path.join(__dirname, 'config', 'firebase.json');
 const fbConfig = fs.existsSync(CONFIG_FILE) ? JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')) : null;
-const js = ORDER.map(f => (f === 'config.js' && fbConfig ? `'use strict';\nconst APP_CONFIG = { firebase: ${JSON.stringify(fbConfig)}, allowedDomain: 'hitam.org' };` : read(f))).join('\n\n');
+const ADMIN_FILE = path.join(__dirname, 'config', 'admin.json');
+const adminHash = fs.existsSync(ADMIN_FILE) ? String(JSON.parse(fs.readFileSync(ADMIN_FILE, 'utf8')).adminEmailSha256 || '') : '';
+const js = ORDER.map(f => (f === 'config.js' && fbConfig ? `'use strict';\nconst APP_CONFIG = { firebase: ${JSON.stringify(fbConfig)}, allowedDomain: 'hitam.org', adminHash: ${JSON.stringify(adminHash)} };` : read(f))).join('\n\n');
 if (js.includes('</script')) throw new Error('JS contains a closing script tag');
 const JOBS_FILE = path.join(__dirname, 'data', 'jobs.json');
 const jobsJson = fs.existsSync(JOBS_FILE) ? fs.readFileSync(JOBS_FILE, 'utf8') : '';

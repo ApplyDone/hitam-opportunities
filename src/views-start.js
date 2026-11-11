@@ -31,8 +31,8 @@ function viewHome() {
   let resumeLine = 'Upload once, see what to fix';
   if (S.resume) { const sc = scoreResume(parseResume(S.resume.text, { pages: S.resume.pages }), { demand: [] }); resumeLine = `Your score: ${sc.score}/100`; }
   const atHitam = hitam.length
-    ? `<div class="tkts">${hitam.slice(0, 4).map((x, i) => ticket(x.o, x.r, i)).join('')}</div>${hitam.length > 4 ? '<a class="btn ghost" style="margin-top:14px" href="#/explore/drives">See all at HITAM</a>' : ''}`
-    : `<section class="callout"><div><b>Nothing posted for HITAM yet.</b><p class="small muted">Official drives live inside CDC Explorer. Copy your CDC Opportunities page once and import it: every student here then sees them with deadlines.</p></div><a class="btn acc" href="#/explore/drives" data-act="go-import">Import from CDC</a></section>`;
+    ? `<div class="tkts">${hitam.slice(0, 4).map((x, i) => ticket(x.o, x.r, i)).join('')}</div>${hitam.length > 4 ? `<a class="btn ghost" style="margin-top:14px" href="#/explore/all">See all ${hitam.length} at HITAM</a>` : ''}`
+    : `<section class="callout"><div><b>Today’s CDC list is not published yet.</b><p class="small muted">The Career Development Centre list is added here every day. Until then, check <a class="link" href="${CAMPUS_SOURCES.cdcApp}" target="_blank" rel="noopener noreferrer">CDC Explorer</a>.</p></div>${isAdmin() ? '<a class="btn acc" href="#/admin">Publish today’s list</a>' : ''}</section>`;
   return `
 <header class="page-head">
   <div class="eyebrow">${esc(p.branch)} · Year ${y}</div>
@@ -41,19 +41,20 @@ function viewHome() {
 </header>
 <section class="start-grid">
   ${startCard('#/explore/internships', 'search', 'Internships', `${interns.length} open for you`, 'HITAM posts, programmes and live roles')}
-  ${startCard('#/explore/drives', 'spark', 'Campus drives and events', `${hitam.length} at HITAM now`, 'From CDC and student posts')}
+  ${startCard('#/explore/all', 'spark', 'Everything open at HITAM', `${hitam.length} from CDC for you`, 'Drives, internships, hackathons with fit %')}
   ${startCard('#/placements', 'target', 'HITAM placements', st ? `${st.offers} offers` : 'Records', st ? `${st.companies} companies hired from HITAM` : 'Who hires from HITAM')}
   ${startCard('#/resume', 'file', 'Fix my resume', resumeLine, 'Score, fixes, keyword match')}
 </section>
 <div class="cols" style="margin-top:34px">
   <div class="stack" style="--g:34px">
-    <section>${sectionHead('At HITAM right now', hitam.length ? `${hitam.length} open · ${lastCdcImport()}` : 'campus board')}${atHitam}</section>
+    <section>${sectionHead('At HITAM right now', hitam.length ? `${hitam.length} open for you · ${cdcFreshness() || 'campus board'}` : 'from CDC')}${atHitam}</section>
     ${programs.length ? `<section>${sectionHead('Hackathons and programmes closing soon', 'verified dates')}${programs.slice(0, 5).map(x => miniRow(x.o, x.r, `${x.o.type} · ${x.o.org}`)).join('')}<a class="btn ghost" style="margin-top:12px" href="#/explore/hackathons">See all hackathons</a></section>` : ''}
     <section>${sectionHead('Best internships for you', interns.length ? 'newest and best matched' : '')}
       ${interns.length ? `<div class="tkts">${interns.slice(0, 4).map((x, i) => ticket(x.o, x.r, i)).join('')}</div><a class="btn ghost" style="margin-top:14px" href="#/explore/internships">See all ${interns.length} internships</a>`
         : emptyBox('No internships open for you yet', 'New ones are added every 6 hours.', '<a class="btn" href="#/explore/internships">Open internships</a>')}</section>
   </div>
   <aside class="stack sticky" style="--g:18px">
+    ${cdcHomeCard(p)}
     ${calendarCard(y, currentSemester())}
     ${S.resume ? '' : `<section class="panel ink"><div class="eyebrow"><b>Biggest upgrade</b></div><div class="h3" style="margin:6px 0">Upload your resume</div><p class="small muted">It fills your skills and ranks every opportunity for you. Read on your device only.</p><a class="btn sm acc" style="margin-top:12px" href="#/resume">Upload resume</a></section>`}
     <section class="panel"><div class="eyebrow">More tools</div><div class="chips" style="margin-top:10px"><a class="chip" href="#/roadmap">Skill roadmap</a><a class="chip" href="#/assistant">Ask the assistant</a><a class="chip" href="#/playbook">Where to apply</a><a class="chip" href="#/profile">My profile</a></div></section>

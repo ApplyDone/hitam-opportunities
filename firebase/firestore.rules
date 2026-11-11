@@ -1,6 +1,7 @@
 rules_version = '2';
 
-// Only verified @hitam.org Google accounts can read or write anything.
+// Only verified @hitam.org Google accounts (and the one admin account) can read or write anything.
+// Before publishing in the Firebase console, replace ADMIN_EMAIL_HERE with the admin's Google email.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -10,17 +11,25 @@ service cloud.firestore {
         && request.auth.token.email.matches('^[^@]+@hitam[.]org$');
     }
 
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'ADMIN_EMAIL_HERE';
+    }
+
+    function isMember() { return isHitam() || isAdmin(); }
+
     // Each student's own profile, applications and settings. Private to them.
     match /users/{uid} {
-      allow read, delete: if isHitam() && request.auth.uid == uid;
-      allow create, update: if isHitam() && request.auth.uid == uid
+      allow read, delete: if isMember() && request.auth.uid == uid;
+      allow create, update: if isMember() && request.auth.uid == uid
         && request.resource.data.keys().hasOnly(['profile', 'apps', 'weights', 'filters', 'views', 'updatedAt']);
     }
 
     // Shared campus board: any HITAM student can read and post; only the author can delete.
     match /notices/{id} {
-      allow read: if isHitam();
-      allow create: if isHitam()
+      allow read: if isMember();
+      allow create: if isMember()
         && request.resource.data.by == request.auth.uid
         && request.resource.data.keys().hasOnly(['type', 'title', 'org', 'deadline', 'br', 'years', 'minCgpa', 'mode', 'pay', 'skills', 'applyUrl', 'desc', 'by', 'byName', 'createdAt'])
         && request.resource.data.title is string && request.resource.data.title.size() > 2 && request.resource.data.title.size() <= 90
@@ -29,7 +38,17 @@ service cloud.firestore {
         && (!('desc' in request.resource.data) || request.resource.data.desc.size() <= 1200)
         && (!('applyUrl' in request.resource.data) || request.resource.data.applyUrl.matches('^https?://.*'));
       allow update: if false;
-      allow delete: if isHitam() && resource.data.by == request.auth.uid;
+      allow delete: if (isMember() && resource.data.by == request.auth.uid) || isAdmin();
+    }
+
+    // Daily CDC Explorer data, one document per page. Students read; only the admin writes.
+    match /cdc/{kind} {
+      allow read: if isMember();
+      allow write: if isAdmin()
+        && kind in ['opps', 'projects', 'portals', 'tracks']
+        && request.resource.data.keys().hasOnly(['items', 'count', 'by', 'updatedAt'])
+        && request.resource.data.items is list
+        && request.resource.data.items.size() <= 1000;
     }
   }
 }

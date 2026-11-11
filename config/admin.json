@@ -1,0 +1,4 @@
+{
+  "_note": "SHA-256 of the admin Google email, lowercased. Only unlocks the admin screen; real access is enforced by firestore.rules.",
+  "adminEmailSha256": "3edb3276a42fb78041a31389ab56f84a4f4b41687d3f4c2825bc8cf56063c8bc"
+}

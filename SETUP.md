@@ -42,6 +42,17 @@ Either:
 
 Add the final web address under **Authentication → Settings → Authorized domains**, or Google sign-in will be blocked there.
 
+## 5. Daily CDC update (admin)
+
+One personal Google account is the admin. Only a SHA-256 hash of its email is in the code (`config/admin.json`); the real check is in the Firestore rules.
+
+1. In `firebase/firestore.rules`, replace `ADMIN_EMAIL_HERE` with the admin email, and publish the rules in the Firebase console (Firestore → Rules). Do not commit the real email.
+2. Open the site at `#/admin` and choose **Admin: sign in with the admin Google account**.
+3. In CDC Explorer, open Opportunities, Multi-Stack projects, Engineering Career Portals or Learning Tracks. Press Ctrl+A, Ctrl+C on each, paste them into the box (several pages in one paste is fine) and press **Read**.
+4. Check the preview and press **Publish to every HITAM student**. Each ticked section replaces yesterday's list; closed cards and past deadlines are skipped, cards without a deadline are kept as rolling.
+
+CDC data lives only in Firestore (`cdc/opps`, `cdc/projects`, `cdc/portals`, `cdc/tracks`), readable by signed-in @hitam.org accounts. Never commit CDC pages to this public repository; the `seed/` folder is git-ignored for local copies.
+
 ## What students experience
 1. Open the site → **Continue with your HITAM account** → pick their `roll@hitam.org` Google account.
 2. Branch and year are filled automatically from the roll number (e.g. `26E51A05A1` → CSE, admitted 2026, year 1).

@@ -3,12 +3,12 @@
    ============================================================ */
 'use strict';
 
-const VIEWS = { assistant: viewAssistant, roadmap: viewRoadmap, home: viewHome, explore: viewOpps, placements: viewPlacements, resume: viewResume, track: viewTrack, profile: viewProfile, prepare: viewPrepare, playbook: viewPlaybook };
-const TITLES = { assistant: 'Assistant', roadmap: 'Skill roadmap', home: 'Home', explore: 'Opportunities', placements: 'Placements', resume: 'Resume', track: 'Applications', profile: 'Profile', prepare: 'Prepare', playbook: 'Playbook' };
-const NAV_ITEMS = [['home', 'Home', 'home'], ['explore', 'Opportunities', 'search'], ['placements', 'Placements', 'target'], ['resume', 'Resume', 'file'], ['track', 'Applications', 'board']];
+const VIEWS = { assistant: viewAssistant, roadmap: viewRoadmap, home: viewHome, explore: viewOpps, placements: viewPlacements, resume: viewResume, track: viewTrack, profile: viewProfile, prepare: viewPrepare, playbook: viewPlaybook, cdc: viewCdc, admin: viewAdmin };
+const TITLES = { assistant: 'Assistant', roadmap: 'Skill roadmap', home: 'Home', explore: 'Opportunities', placements: 'Placements', resume: 'Resume', track: 'Applications', profile: 'Profile', prepare: 'Prepare', playbook: 'Playbook', cdc: 'CDC Hub', admin: 'Admin' };
+const NAV_ITEMS = [['home', 'Home', 'home'], ['explore', 'Opportunities', 'search'], ['cdc', 'CDC Hub', 'grid'], ['placements', 'Placements', 'target'], ['resume', 'Resume', 'file'], ['track', 'Applications', 'board']];
 const MORE_ITEMS = [['roadmap', 'Skill roadmap', 'map'], ['assistant', 'Assistant', 'send'], ['playbook', 'Where to apply', 'external']];
-const NAV_GROUPS = [['', NAV_ITEMS], ['More', MORE_ITEMS]];
-const TABBAR = NAV_ITEMS;
+const navGroups = () => [['', NAV_ITEMS], ['More', MORE_ITEMS], ...(isAdmin() || AUTH.state === 'preview' ? [['Admin', [['admin', 'Daily CDC update', 'upload']]]] : [])];
+const TABBAR = NAV_ITEMS.filter(([k]) => k !== 'placements');
 const STAGE_NAV = [];
 
 let current = { name: '', arg: '' };
@@ -98,7 +98,7 @@ function navBadge(key) {
 
 function renderNav() {
   const n = current.name;
-  $('#nav').innerHTML = NAV_GROUPS.map(([label, items]) => `<div class="nav-g">${label ? `<div class="nav-l">${label}</div>` : ''}${items.map(([k, l, ic]) => `<a class="nav-i ${n === k ? 'on' : ''}" href="#/${k}" ${n === k ? 'aria-current="page"' : ''}>${icon(ic)}<span>${l}</span>${navBadge(k)}</a>`).join('')}</div>`).join('');
+  $('#nav').innerHTML = navGroups().map(([label, items]) => `<div class="nav-g">${label ? `<div class="nav-l">${label}</div>` : ''}${items.map(([k, l, ic]) => `<a class="nav-i ${n === k ? 'on' : ''}" href="#/${k}" ${n === k ? 'aria-current="page"' : ''}>${icon(ic)}<span>${l}</span>${navBadge(k)}</a>`).join('')}</div>`).join('');
   $('#tabbar').innerHTML = TABBAR.map(([k, l, ic]) => `<a class="tab ${n === k ? 'on' : ''}" href="#/${k}" ${n === k ? 'aria-current="page"' : ''}>${icon(ic)}<span>${l}</span></a>`).join('');
   renderTools();
 }
@@ -151,7 +151,8 @@ function renderGate() {
       ? `<p class="gate-note">Sign-in is not connected yet. The administrator needs to add the Firebase settings (see SETUP.md).</p>${isLocalHost() ? '<button class="btn primary wide" data-act="preview">Open local preview</button><p class="gate-small">Preview runs on this device only, with sample listings.</p>' : ''}`
       : `<button class="btn google wide" data-act="sign-in">${GOOGLE_G}<span>Continue with your HITAM account</span></button>
          ${AUTH.error ? `<p class="gate-err" role="alert">${esc(AUTH.error)}</p>` : ''}
-         <p class="gate-small">Use your <b>roll-number@hitam.org</b> Google account. Other emails are refused.</p>`;
+         <p class="gate-small">Use your <b>roll-number@hitam.org</b> Google account. Other emails are refused.</p>
+         ${/admin/.test(location.hash) ? `<button class="btn ghost wide" style="margin-top:10px" data-act="sign-in-admin">Admin: sign in with the admin Google account</button>` : ''}`;
   $('#gate').innerHTML = `<div class="gate">
     <section class="gate-l">
       <a class="brand" aria-label="HITAM Opportunities">${BRAND_MARK}<span class="brand-t"><b>HITAM</b><span>Opportunities Intelligence</span></span></a>
@@ -193,6 +194,7 @@ async function onAuthChange() {
     try { await cloudLoad(); } catch (err) { toast('Working offline. Changes will sync when you reconnect.'); CLOUD.loaded = true; }
     applyRollProfile();
     subscribeNotices(() => { buildTicker(); rerender(); });
+    subscribeCdc(() => { buildTicker(); rerender(); });
   } else {
     stopCloud();
   }
@@ -266,6 +268,15 @@ function refreshCal() {
 const ACTIONS = {
   open: el => openDrawerFor(el.dataset.id),
   'sign-in': () => signInWithHitam(),
+  'sign-in-admin': () => signInWithHitam(true),
+  'adm-read': () => { const t = $('#adm-in'); admRead(t ? t.value : ''); },
+  'adm-file': el => { const file = el.files && el.files[0]; if (!file) return; if (file.size > 3e6) { toast('That file is too large'); return; } file.text().then(admRead).catch(() => toast('Could not read that file')); el.value = ''; },
+  'adm-pick': el => { ADM.pick = { ...ADM.pick, [el.dataset.id]: el.checked }; },
+  'adm-publish': () => { admPublish(); },
+  'adm-clear': () => { ADM.text = ''; ADM.res = null; rerender(); },
+  'ch-cat': el => { CH.cat = el.dataset.id; rerender(); },
+  'ch-mine': el => { CH.mine = el.checked; CH.cat = ''; rerender(); },
+  'ch-fits': el => { CH.fitsOnly = el.checked; refreshCdcHub(); },
   'sign-out': () => { if (confirm('Sign out of HITAM Opportunities?')) signOutUser(); },
   preview: () => startPreview(),
   'delete-notice': async el => { const o = oppById(el.dataset.id); if (!o || !o.docId || !confirm('Delete your post from the campus board for everyone?')) return; try { await deleteNotice(o.docId); closeDrawer(); toast('Post deleted'); } catch (err) { toast('Could not delete. Try again.'); } },
@@ -333,10 +344,6 @@ const ACTIONS = {
   'op-all': () => { OP.mine = false; OP.limit = OP_PAGE; rerender(); },
   'op-city': el => { OP.city = el.dataset.id; OP.limit = OP_PAGE; rerender(); },
   'op-more': () => { OP.limit += OP_PAGE; refreshOps(); },
-  'cdc-read': () => { const t = $('#cdc-in'); CDCIMP.text = t ? t.value : ''; if (!CDCIMP.text.trim()) { toast('Paste the copied CDC page first'); return; } CDCIMP.res = parseCdcText(CDCIMP.text); rerender(); const d = $('#notice-details'); if (d) { d.open = true; } },
-  'cdc-clear': () => { CDCIMP.text = ''; CDCIMP.res = null; rerender(); },
-  'cdc-add': () => { addCdcItems(); },
-  'go-import': () => { setTimeout(() => ACTIONS['op-notice'](), 400); },
   'op-notice': () => { const d = $('#notice-details'); if (d) { d.open = true; d.scrollIntoView({ behavior: 'smooth', block: 'center' }); } },
   'pl-branch': el => { PL.branch = el.dataset.id; rerender(); },
   'f-sort': el => { setFilters({ sort: el.value }); refreshResults(); },
@@ -427,6 +434,9 @@ function onInput(e) {
     setProfile({ [d.in]: v });
     refreshIdCard();
     if (d.in === 'name') { const av = $('.avatar'); if (av) av.textContent = initial(S.profile); }
+  } else if (d.inCh) {
+    CH.q = el.value;
+    refreshCdcHub();
   } else if (d.inOp) {
     OP.q = el.value;
     OP.limit = OP_PAGE;
@@ -482,15 +492,18 @@ function onSubmit(e) {
 }
 
 const isTyping = t => t && (t.matches('input, textarea, select') || t.isContentEditable);
-/* One-click import: the CDC bookmarklet posts the page text here. Accept it only from CDC Explorer. */
+/* One-click CDC send for the admin: the bookmarklet posts the page text here. Accept it only from CDC Explorer. */
 function onCdcMessage(e) {
   if (e.origin !== 'https://cdc.hitam.org' || !e.data || e.data.hitamCdc !== 1 || typeof e.data.text !== 'string') return;
   try { e.source.postMessage({ hitamCdcAck: 1 }, e.origin); } catch (err) { /* sender gone */ }
-  CDCIMP.text = e.data.text.slice(0, 500000);
-  CDCIMP.res = parseCdcText(CDCIMP.text);
-  if (current.name === 'explore' && current.arg === 'drives') rerender(); else location.hash = '#/explore/drives';
-  toast(CDCIMP.res.items.length ? `Found ${CDCIMP.res.items.length} open opportunities. Check the preview and add them.` : 'Could not read that page. Open CDC Opportunities and try again.');
-  setTimeout(() => { const d = $('#notice-details'); if (d) { d.open = true; d.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }, 400);
+  if (!isAdmin() && AUTH.state !== 'preview') { toast('Only the admin account can add CDC data.'); return; }
+  const add = e.data.text.slice(0, 1000000);
+  if (ADM.text.includes(add.slice(0, 400))) return;
+  ADM.text = ADM.text ? `${ADM.text}
+
+${add}` : add;
+  if (current.name !== 'admin') location.hash = '#/admin';
+  admRead(ADM.text);
 }
 
 function onKeydown(e) {

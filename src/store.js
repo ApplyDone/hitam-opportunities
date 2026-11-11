@@ -116,7 +116,12 @@ function setSkill(name, level) {
 function toggleIn(list, v) { return list.includes(v) ? list.filter(x => x !== v) : [...list, v]; }
 function setFilters(patch) { commit({ filters: { ...S.filters, ...patch } }); }
 
-const allOpps = () => [...(AUTH.state === 'preview' ? SEED : []), ...S.custom, ...NOTICES, ...PROGRAMS, ...LIVE.jobs];
+/* CDC listings published by the admin come first; older student imports of the same card are hidden. */
+function allOpps() {
+  const cdcKeys = new Set(CDC.opps.map(o => `${o.title}|${o.org}`.toLowerCase()));
+  const notDup = o => !cdcKeys.has(`${o.title}|${o.org}`.toLowerCase());
+  return [...(AUTH.state === 'preview' && !CDC.opps.length ? SEED : []), ...CDC.opps, ...S.custom.filter(notDup), ...NOTICES.filter(notDup), ...PROGRAMS, ...LIVE.jobs];
+}
 const oppById = id => allOpps().find(o => String(o.id) === String(id));
 const personaProfile = id => {
   const p = PERSONAS.find(x => x.id === id).profile;

@@ -80,3 +80,89 @@ test('unreadable text yields nothing instead of garbage', () => {
   const r = parseCdcText('hello world\nthis is not a list', NOW);
   assert.equal(r.items.length, 0);
 });
+
+/* ---------- Real CDC format: rolling, closed, pay, several batches ---------- */
+const { dmy, parsePay } = ctx.module.exports;
+const REAL = `Total Openings
+112
+Today's Only
+My Activity
+Acme Labs
+Closing Soon
+Winter Internship 2026
+Internship
+Branches: CSE, CSM, ECE
+Matches CSE
+Batches: 2024-2028, 2023-2027
+New Delhi
+₹10,000/month
+Posted on: 11-11-2026
+Deadline: 13-11-2026
+Official JD Attachment
+View Document
+Status
+Details
+Apply Now
+Beta Corp
+Data Specialist
+Full-time
+All Branches
+Batches: 2023-2027
+Overview
+Apply at https://careers.beta.example/jobs/42 before the drive.
+Hyderabad
+Posted on: 06-11-2026
+Deadline: Rolling
+Status
+Details
+Apply Now
+Gamma Inc
+Apprentice
+Internship
+Branches: MECH
+Batches: 2023-2027
+Hyderabad
+Posted on: 04-11-2026
+Status
+Details
+Apply Now
+Delta
+Closed
+Embedded Intern
+Internship
+All Branches
+Batches: 2023-2027
+Hyderabad
+Posted on: 22-10-2026
+Deadline: 22 October 2026, 05:07 PM
+Status
+Details
+Apply Now)`;
+
+test('reads the real CDC card format: rolling, closed, pay, batches, links', () => {
+  const r = parseCdcText(REAL, NOW);
+  assert.equal(r.items.length, 3);
+  assert.equal(r.skippedClosed, 1);
+  const [a, b, c] = r.items;
+  assert.equal(a.org, 'Acme Labs');
+  assert.equal(a.title, 'Winter Internship 2026');
+  assert.deepEqual([...a.years], [3, 4]);
+  assert.deepEqual([...a.pay], ['stipend', 10000]);
+  assert.equal(a.location, 'New Delhi');
+  assert.equal(b.type, 'Placement');
+  assert.equal(b.deadline, '');
+  assert.equal(b.rolling, true);
+  assert.equal(b.link, 'https://careers.beta.example/jobs/42');
+  assert.equal(c.rolling, true);
+  assert.deepEqual([...c.br], ['MECH']);
+});
+
+test('dates and pay lines in the formats CDC uses', () => {
+  assert.equal(dmy('Deadline: 22 October 2026, 05:07 PM'), '2026-10-22');
+  assert.equal(dmy('28 Oct 2026'), '2026-10-28');
+  assert.deepEqual([...parsePay('₹15,600 per month')], ['stipend', 15600]);
+  assert.deepEqual([...parsePay('3.5k pm INR')], ['stipend', 3500]);
+  assert.deepEqual([...parsePay('Upto 8 LPA (30000 for first 6 months)', 'Placement')], ['ctc', 8]);
+  assert.deepEqual([...parsePay('Unpaid')], ['none']);
+  assert.equal(parsePay('Prizes worth ₹6,00,000')[0], 'text');
+});
