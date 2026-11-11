@@ -3,9 +3,9 @@
    ============================================================ */
 'use strict';
 
-const VIEWS = { assistant: viewAssistant, roadmap: viewRoadmap, home: viewHome, explore: viewOpps, placements: viewPlacements, resume: viewResume, track: viewTrack, profile: viewProfile, prepare: viewPrepare, playbook: viewPlaybook, cdc: viewCdc, admin: viewAdmin };
-const TITLES = { assistant: 'Assistant', roadmap: 'Skill roadmap', home: 'Home', explore: 'Opportunities', placements: 'Placements', resume: 'Resume', track: 'Applications', profile: 'Profile', prepare: 'Prepare', playbook: 'Playbook', cdc: 'CDC Hub', admin: 'Admin' };
-const NAV_ITEMS = [['home', 'Home', 'home'], ['explore', 'Opportunities', 'search'], ['cdc', 'CDC Hub', 'grid'], ['placements', 'Placements', 'target'], ['resume', 'Resume', 'file'], ['track', 'Applications', 'board']];
+const VIEWS = { assistant: viewAssistant, roadmap: viewRoadmap, home: viewHome, explore: viewOpps, placements: viewPlacements, resume: viewResume, track: viewTrack, profile: viewProfile, prepare: viewPrepare, playbook: viewPlaybook, cdc: viewCdc, hub: viewCdc, admin: viewAdmin };
+const TITLES = { assistant: 'Assistant', roadmap: 'Skill roadmap', home: 'Home', explore: 'Opportunities', placements: 'Placements', resume: 'Resume', track: 'Applications', profile: 'Profile', prepare: 'Prepare', playbook: 'Playbook', cdc: 'Career Hub', hub: 'Career Hub', admin: 'Admin' };
+const NAV_ITEMS = [['home', 'Home', 'home'], ['explore', 'Opportunities', 'search'], ['hub', 'Career Hub', 'grid'], ['placements', 'Placements', 'target'], ['resume', 'Resume', 'file'], ['track', 'Applications', 'board']];
 const MORE_ITEMS = [['roadmap', 'Skill roadmap', 'map'], ['assistant', 'Assistant', 'send'], ['playbook', 'Where to apply', 'external']];
 const navGroups = () => [['', NAV_ITEMS], ['More', MORE_ITEMS], ...(isAdmin() || AUTH.state === 'preview' ? [['Admin', [['admin', 'Daily CDC update', 'upload']]]] : [])];
 const TABBAR = NAV_ITEMS.filter(([k]) => k !== 'placements');
@@ -156,7 +156,7 @@ function renderGate() {
   $('#gate').innerHTML = `<div class="gate">
     <section class="gate-l">
       <a class="brand" aria-label="HITAM Opportunities">${BRAND_MARK}<span class="brand-t"><b>HITAM</b><span>Opportunities Intelligence</span></span></a>
-      <div class="gate-copy"><h1>Every opportunity at HITAM, <span>in one place.</span></h1>
+      <div class="gate-copy"><div class="gate-tag">Find your path.</div><h1>Every opportunity at HITAM, <span>in one place.</span></h1>
       <p>Campus drives, hackathons and internships, ranked for your branch and year. Upload your resume once and see exactly what to fix.</p>
       <div class="gate-proof">${gateProof()}</div></div>
       <p class="gate-src">Placement figures from hitam.org. Live roles from official company career feeds.</p>

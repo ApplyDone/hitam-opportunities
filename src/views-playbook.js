@@ -13,7 +13,7 @@ const YEAR_PLAN = {
     learn: ['Your track’s core skills', 'DSA: hashing, two pointers, trees', 'SQL'], build: ['One substantial project, deployed', 'One open-source contribution'], apply: ['Summer internships (startups, remote)', 'Faculty research', 'Smart India Hackathon (internal round)'], where: ['Internshala', 'Wellfound', 'AICTE Internship Portal'] },
   3: { title: 'Year 3 · Internships that convert', now: ['Shortlist 20 companies with a Hyderabad presence and follow their careers pages', 'Get your resume to 80+ in Resume Studio', 'Do two mock interviews and fix what they expose', 'Apply early: many large companies open summer internship roles months ahead'],
     learn: ['DSA: graphs, dynamic programming', 'DBMS, OS, networks basics', 'One cloud fundamentals course'], build: ['A portfolio-grade project with tests and a demo', 'A short technical write-up of it'], apply: ['Summer internships with pre-placement offer potential', 'Research fellowships', 'Google Summer of Code'], where: ['Company early-careers pages', 'LinkedIn Jobs', 'CDC campus drives'] },
-  4: { title: 'Year 4 · Placements', now: ['Register for every eligible CDC drive on time', 'Practise aptitude daily for four weeks before drive season', 'Ask seniors and alumni for referrals to off-campus roles', 'Keep a backup plan: apprenticeships or higher-studies exams'],
+  4: { title: 'Year 4 · Placements', now: ['Register for every eligible campus drive on time', 'Practise aptitude daily for four weeks before drive season', 'Ask seniors and alumni for referrals to off-campus roles', 'Keep a backup plan: apprenticeships or higher-studies exams'],
     learn: ['Aptitude and reasoning', 'Interview stories in STAR format', 'System design basics'], build: ['Polish two projects you can explain end to end'], apply: ['Campus drives', 'Off-campus fresher roles', 'Apprenticeships (NATS)'], where: ['CDC Explorer', 'Company careers pages', 'Naukri', 'LinkedIn Jobs'] }
 };
 
@@ -38,7 +38,7 @@ function yearSection() {
   return `<section id="pb-now" class="panel ink" style="margin-bottom:34px"><div class="eyebrow"><b>Your next 90 days</b> · ${esc(S.profile.name.trim() || 'you')}, year ${y}</div>
     <ol class="pb-now">${p.now.map(n => `<li>${esc(n)}</li>`).join('')}</ol>
     <div class="row"><a class="btn sm acc" href="#/resume">Review my resume</a><a class="btn sm ghost" href="#/explore/internships">See my matches</a></div></section>
-  <section id="pb-years">${sectionHead('Year by year', 'general pattern, confirm dates with CDC')}
+  <section id="pb-years">${sectionHead('Year by year', 'general pattern, confirm dates with your placement office')}
     <div class="pb-years">${[1, 2, 3, 4].map(n => { const x = YEAR_PLAN[n]; return `<article class="pb-year ${n === y ? 'on' : ''}"><div class="eyebrow">${n === y ? '<b>You are here</b>' : `Year ${n}`}</div><h3 class="h3" style="font:400 1.45rem/1.1 var(--f-display)">${esc(x.title.split(' · ')[1])}</h3>
       ${[['Learn', x.learn], ['Build', x.build], ['Apply for', x.apply], ['Where', x.where]].map(([k, v]) => `<div class="pb-k">${k}</div><ul>${v.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`).join('')}</article>`; }).join('')}</div></section>`;
 }

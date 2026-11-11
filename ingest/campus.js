@@ -17,12 +17,16 @@ async function collectCampus() {
   const news = P.dedupePosts(posts.map(p => P.postToItem(p, CATS))).slice(0, 24);
   const pages = await getJson(`${BASE}/pages?slug=placement-lists&_fields=content,modified,link`);
   const page = pages[0];
+  const lp = await getJson(`${BASE}/pages?slug=live-projects&_fields=content,modified,link`).catch(() => []);
+  const hitamInternships = lp[0] ? P.parseLiveProjects(lp[0].content.rendered) : [];
   const agg = page ? P.aggregatePlacements(P.parsePlacementTables(page.content.rendered)) : { recruiters: [], stats: {} };
   return {
     generatedAt: new Date().toISOString(),
     sources: { news: 'https://hitam.org/news-and-media/', placements: page ? page.link : 'https://hitam.org/placement-lists/', placementsUpdated: page ? page.modified : null },
     news,
     placements: agg,
+    hitamInternships,
+    hitamInternshipsSource: lp[0] ? { url: lp[0].link, updated: lp[0].modified } : null,
     contacts: { cdcPage: 'https://hitam.org/career-design-centre/', cdcExplorer: 'https://cdc.hitam.org/', trainingPage: 'https://hitam.org/training-and-placements/', clubsPage: 'https://hitam.org/clubs-and-societies/' }
   };
 }
@@ -33,7 +37,7 @@ if (require.main === module) {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, JSON.stringify(out));
     const s = out.placements.stats;
-    console.log(`Campus: ${out.news.length} official posts, ${s.offers || 0} placement offers from ${s.companies || 0} companies (median ${s.medianPkg} LPA). Wrote data/campus.json`);
+    console.log(`Campus: ${out.news.length} official posts, ${s.offers || 0} placement offers from ${s.companies || 0} companies, ${out.hitamInternships.length} HITAM internships/live projects (median ${s.medianPkg} LPA). Wrote data/campus.json`);
   }).catch(err => { console.error('Campus collection failed:', err.message); process.exit(1); });
 }
 

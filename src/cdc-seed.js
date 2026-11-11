@@ -126,7 +126,7 @@ function cdcItemToOpp(it) {
     mode: /remote|online/i.test(loc) ? 'Remote' : /hybrid/i.test(loc) ? 'Hybrid' : 'On-site', city: loc || 'India', location: loc,
     pay: payOk ? it.pay.slice(0, 2) : ['unknown'], skills: skills.length ? skills : ['Problem Solving'], lvl: 1,
     dur: it.type === 'Placement' ? 'Full-time' : deadline ? 'See listing' : 'Rolling', hrs: 0, track: ['sw'],
-    tags: ['From CDC Explorer', ...(deadline ? [] : ['Rolling'])], desc: String(it.desc || '').slice(0, 1200),
+    tags: ['HITAM listing', ...(deadline ? [] : ['Rolling'])], desc: String(it.desc || '').replace(/^From CDC Explorer[^.]*\.\s*/, '').slice(0, 1200),
     applyUrl: isHttpUrl(it.link) ? it.link : CAMPUS_SOURCES.cdcApp, postedAt: posted
   };
 }

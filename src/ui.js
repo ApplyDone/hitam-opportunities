@@ -49,7 +49,9 @@ const ICONS = {
 };
 const icon = (n, label) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" ${label ? `role="img" aria-label="${esc(label)}"` : 'aria-hidden="true"'}>${ICONS[n]}</svg>`;
 
-const BRAND_MARK = `<svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#111318"/><path d="M9 22V10M9 16h8M17 10v12" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none"/><path d="M20 13l4-4m0 0h-3.2M24 9v3.2" stroke="#e8590c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
+/* Brand mark: "Find your path". A start point, the trail so far (dotted), and the way ahead in brand orange. */
+const BRAND_MARK_SVG = '<svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#111318"/><path d="M10.6 22.5h3q2.4 0 2.4-2.4" stroke="#fff" stroke-opacity=".7" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="0 3.1" fill="none"/><path d="M16 19.6V14.8q0-2.8 2.8-2.8h3.4" stroke="#e8590c" stroke-width="2.6" stroke-linecap="round" fill="none"/><path d="M20.4 8.7l3.4 3.3-3.4 3.3" stroke="#e8590c" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="8" cy="22.5" r="2.4" fill="#fff"/></svg>';
+const BRAND_MARK = BRAND_MARK_SVG;
 
 /* ---------- Tickets & rows ---------- */
 function segMeter(score) {
@@ -65,7 +67,7 @@ function dueBadge(r, o) {
   }
   return `<span class="due ${urgency(r.dl)}" title="${esc(countdownLong(r.dl))}">${countdown(r.dl)}</span>`;
 }
-const sourcePill = o => (o.live ? '<span class="pill live" title="From a live job posting">Live</span>' : o.program ? '<span class="pill ok" title="Official programme with a verified date">Official</span>' : o.cdc ? '<span class="pill acc" title="Verified by HITAM Career Development Centre">CDC</span>' : o.custom || o.shared ? `<span class="pill acc" title="On the HITAM board">${o.tags && o.tags[0] === 'From CDC Explorer' ? 'CDC' : 'HITAM'}</span>` : '<span class="pill" title="Example listing shown in local preview only">Example</span>');
+const sourcePill = o => (o.live ? '<span class="pill live" title="From a live job posting">Live</span>' : o.program ? '<span class="pill ok" title="Official programme with a verified date">Official</span>' : o.cdc ? '<span class="pill acc" title="Verified HITAM listing">HITAM</span>' : o.custom || o.shared ? `<span class="pill acc" title="On the HITAM board">HITAM</span>` : '<span class="pill" title="Example listing shown in local preview only">Example</span>');
 const applyBtn = (o, cls = 'btn sm acc') => (o.applyUrl ? `<a class="${cls}" href="${esc(o.applyUrl)}" target="_blank" rel="noopener noreferrer">Apply${icon('external')}</a>` : '');
 
 function skillTags(o, r, max = 4) {

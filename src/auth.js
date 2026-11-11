@@ -129,10 +129,10 @@ function noticeFromDoc(id, d) {
     br: d.br === 'ALL' || Array.isArray(d.br) ? d.br : 'ALL', years: Array.isArray(d.years) && d.years.length ? d.years : [1, 2, 3, 4],
     minCgpa: typeof d.minCgpa === 'number' ? d.minCgpa : undefined, mode: MODES.includes(d.mode) ? d.mode : 'On-campus',
     pay: Array.isArray(d.pay) ? d.pay : ['unknown'], skills: (d.skills || []).filter(s => SKILLS.includes(s)).slice(0, 6).concat((d.skills || []).some(s => SKILLS.includes(s)) ? [] : ['Problem Solving']),
-    applyUrl: isHttpUrl(d.applyUrl) ? d.applyUrl : undefined, desc: String(d.desc || '').slice(0, 1200),
+    applyUrl: isHttpUrl(d.applyUrl) ? d.applyUrl : undefined, desc: String(d.desc || '').replace(/^From CDC Explorer[^.]*\.\s*/, '').slice(0, 1200),
     lvl: 1, dur: d.type === 'Placement' ? 'Full-time' : 'See notice', hrs: 0, track: ['sw'], city: 'HITAM',
     postedAt: d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toISOString() : null,
-    tags: [String(d.desc || '').startsWith('From CDC Explorer') ? 'From CDC Explorer' : 'Campus notice'], postedBy: String(d.byName || 'A HITAM student').slice(0, 40), mine: AUTH.user && d.by === AUTH.user.uid
+    tags: ['Campus notice'], postedBy: String(d.byName || 'A HITAM student').slice(0, 40), mine: AUTH.user && d.by === AUTH.user.uid
   };
 }
 

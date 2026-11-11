@@ -45,14 +45,13 @@ const latestLive = () => [LIVE.times && LIVE.times.ats, LIVE.times && LIVE.times
 
 function cdcFreshness() {
   const t = CDC.times && CDC.times.opps;
-  return CDC.opps.length ? `CDC list updated ${t ? agoText(t) : 'recently'}.` : '';
+  return CDC.opps.length ? `Updated ${t ? agoText(t) : 'today'}.` : '';
 }
 
 function tabNote(tab) {
-  const cdc = `<a class="link" href="${CAMPUS_SOURCES.cdcApp}" target="_blank" rel="noopener noreferrer">CDC Explorer</a>`;
-  if (tab[0] === 'all') return `Every open opportunity in one list: CDC-verified HITAM listings first, then official programmes, then live company postings. The % is how well each fits your skills, branch and year. ${cdcFreshness()}`;
+  if (tab[0] === 'all') return `Every open opportunity in one list: HITAM listings first, then official programmes, then live company postings. The % is how well each fits your skills, branch and year. ${cdcFreshness()}`;
   if (tab[0] === 'internships') return 'Internships posted for HITAM first, then official programs, then live postings from company career pages. Open to every year.';
-  if (tab[0] === 'drives') return `Campus placement drives. Register in ${cdc}; import the list below so everyone at HITAM sees it here with deadlines.`;
+  if (tab[0] === 'drives') return 'Campus placement drives for HITAM students, best fit first, with deadlines.';
   if (tab[0] === 'hackathons') return 'Hackathons and contests: those posted for HITAM first, then official national programs.';
   if (tab[0] === 'jobs') return 'Optional. Fresher-level openings from company career pages. Not required for placements.';
   return 'Workshops, research openings and club calls. Clubs that help a job search are marked below.';
@@ -68,7 +67,7 @@ function boardStrip(tab) {
 function hitamCallout(tab) {
   if (!['all', 'internships', 'drives', 'hackathons'].includes(tab[0])) return '';
   if (opRows(tab, false, false).some(x => isHitamListing(x.o))) return '';
-  return `<section class="callout"><div><b>No CDC ${esc(tab[1].toLowerCase())} published yet.</b><p class="small muted">The Career Development Centre list is added here every day. Until then, check <a class="link" href="${CAMPUS_SOURCES.cdcApp}" target="_blank" rel="noopener noreferrer">CDC Explorer</a> directly.</p></div>${isAdmin() ? '<a class="btn acc" href="#/admin">Publish today’s CDC list</a>' : ''}</section>`;
+  return `<section class="callout"><div><b>Today’s HITAM ${esc(tab[1].toLowerCase())} are on their way.</b><p class="small muted">New HITAM listings are added here every day. Meanwhile, the live roles below are open now.</p></div>${isAdmin() ? '<a class="btn acc" href="#/admin">Publish today’s list</a>' : ''}</section>`;
 }
 
 function clubsHTML() {
@@ -110,7 +109,43 @@ ${boardStrip(tab)}${hitamCallout(tab)}
   ${hasCityFilter(tab) ? `<label class="ck op-ck"><input type="checkbox" data-act="op-paid" ${OP.paid ? 'checked' : ''}><span>Paid</span></label>` : ''}
 </div>
 ${hasCityFilter(tab) ? `<div class="chips" style="margin:-4px 0 18px">${[['any', 'Anywhere'], ['remote', 'Remote'], ['hyderabad', 'Hyderabad'], ['bengaluru', 'Bengaluru']].map(([v, l]) => `<button class="chip ${OP.city === v ? 'on' : ''}" data-act="op-city" data-id="${v}">${l}</button>`).join('')}</div>` : ''}
-${tab[0] === 'events' ? clubsHTML() : ''}
+${tab[0] === 'events' ? clubsHTML() : ''}${tab[0] === 'internships' || tab[0] === 'all' ? hitamInternsHTML() : ''}
 <div id="op-results">${opResultsHTML()}</div>
 <details class="engine" id="notice-details" style="margin-top:36px" ${NOTICE.parsed ? 'open' : ''}><summary>${icon('plus')} Heard of something not listed? Post a campus notice</summary><div class="engine-b">${noticeBoxHTML()}</div></details>`;
+}
+
+/* ---------- Internships and live projects run at HITAM (hitam.org/live-projects) ---------- */
+function hitamInternships() {
+  const list = (CAMPUS && Array.isArray(CAMPUS.hitamInternships) ? CAMPUS.hitamInternships : []).filter(x => x && x.title);
+  return list.map(x => {
+    const text = `${x.title} ${x.subtitle || ''} ${(x.points || []).join(' ')}`;
+    const skills = Object.keys(detectSkills(text)).filter(s => SKILLS.includes(s)).slice(0, 5);
+    const have = skills.filter(s => (S.profile.skills[s] || 0) >= 1);
+    const fit = Math.round(100 * (skills.length ? 0.35 + 0.65 * (have.length / skills.length) : 0.55));
+    return { ...x, skills, have, fit };
+  }).sort((a, b) => b.fit - a.fit);
+}
+
+function hitamInternCard(x) {
+  const stats = (x.stats || []).map(s => `<span class="hi-stat"><b class="mono">${esc(String(s.n))}</b>${esc(s.label)}</span>`).join('');
+  return `<article class="cdc-card hi-card">
+  <div class="cdc-card-main">
+    <div class="row" style="gap:8px"><span class="pill acc">${esc(x.kind)}</span><span class="small muted">at HITAM · ${esc(x.org)}</span></div>
+    <h3 class="h3" style="margin:6px 0">${esc(x.title)}</h3>${x.subtitle ? `<p class="small muted" style="margin:-2px 0 6px">${esc(x.subtitle)}</p>` : ''}
+    <ul class="hi-points">${(x.points || []).slice(0, 3).map(p => `<li>${esc(p)}</li>`).join('')}</ul>
+    ${stats ? `<div class="hi-stats">${stats}</div>` : ''}
+    ${x.skills.length ? `<div class="tkt-skills" style="margin-top:10px">${x.skills.map(s => `<span class="tag ${x.have.includes(s) ? 'have' : ''}">${esc(s)}</span>`).join('')}</div>` : ''}
+  </div>
+  ${fitStub(x.fit)}
+</article>`;
+}
+
+function hitamInternsHTML(limit = 6) {
+  const rows = hitamInternships();
+  if (!rows.length) return '';
+  const src = CAMPUS.hitamInternshipsSource;
+  return `<section style="margin-bottom:28px">${sectionHead('Internships and live projects at HITAM', `${rows.length} with industry partners`)}
+  <p class="small muted" style="margin:-4px 0 12px">Run on campus with HITAM’s industry partners. Selection is on skills, so the % shows how ready you are. Ask your department or the Training & Placement office about the next intake.</p>
+  <div class="cdc-list">${rows.slice(0, limit).map(hitamInternCard).join('')}</div>
+  ${src && src.url ? `<p class="tiny muted" style="margin-top:8px">From <a class="link" href="${esc(src.url)}" target="_blank" rel="noopener noreferrer">hitam.org</a>, refreshed every day.</p>` : ''}</section>`;
 }

@@ -81,4 +81,36 @@ function dedupePosts(items) {
   return kept.map(({ ws, ...i }) => i);
 }
 
-module.exports = { parsePlacementTables, aggregatePlacements, postToItem, dedupePosts, normBranch };
+
+/* hitam.org/live-projects: numbered cards ("01" / partner / project / points / stats) of HITAM's own industry internships and live projects. */
+const decode = t => t.replace(/&#8211;|&#8212;/g, '–').replace(/&#8217;|&#8216;/g, "'").replace(/&#8220;|&#8221;/g, '"').replace(/&amp;|&#038;/g, '&').replace(/&nbsp;/g, ' ').replace(/&#\d+;/g, ' ');
+function parseLiveProjects(html) {
+  const text = decode(String(html || '').replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, '').replace(/<[^>]+>/g, '\n'));
+  const lines = text.split('\n').map(l => l.replace(/\s+/g, ' ').trim()).filter(Boolean);
+  const start = lines.findIndex(l => /^industry live projects$/i.test(l));
+  const body = start >= 0 ? lines.slice(start) : lines;
+  const out = [];
+  body.forEach((l, i) => {
+    if (!/^0\d$/.test(l)) return;
+    const end = body.findIndex((x, j) => j > i && (/^0\d$/.test(x) || /^find your path/i.test(x)));
+    const blk = body.slice(i + 1, end < 0 ? body.length : end);
+    if (blk.length < 3) return;
+    const ownProject = blk.some(x => /^objective:?$/i.test(x));
+    const stats = [];
+    const points = [];
+    for (let k = 2; k < blk.length; k += 1) {
+      const x = blk[k];
+      if (/^\d{1,3}$/.test(x) && blk[k + 1] && blk[k + 1].length <= 20) { stats.push({ n: Number(x), label: blk[k + 1] }); k += 1; } else if (/:$/.test(x) && blk[k + 1]) { points.push(`${x} ${blk[k + 1]}`); k += 1; } else if (x.length > 20) points.push(x);
+    }
+    const org = ownProject ? 'HITAM' : blk[0];
+    const title = ownProject ? blk[0] : blk[1];
+    const all = `${title} ${blk[1]} ${points.join(' ')}`;
+    out.push({
+      org: org.slice(0, 80), title: title.slice(0, 110), subtitle: ownProject ? blk[1].slice(0, 110) : '',
+      kind: /intern/i.test(all) ? 'Internship' : 'Live project', points: points.slice(0, 6).map(p => p.slice(0, 260)), stats: stats.slice(0, 4)
+    });
+  });
+  return out;
+}
+
+module.exports = { parseLiveProjects, parsePlacementTables, aggregatePlacements, postToItem, dedupePosts, normBranch };
