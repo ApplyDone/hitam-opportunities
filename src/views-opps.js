@@ -89,9 +89,22 @@ function opResultsHTML() {
 function refreshOps() { const r = $('#op-results'); if (r) r.innerHTML = opResultsHTML(); }
 
 /* ---------- Import from CDC Explorer ---------- */
+/** Bookmarklet that runs on the student's own CDC page and hands the page text to this app via postMessage. */
+function cdcBookmarklet() {
+  const home = `${location.origin}${location.pathname}`;
+  const code = `(function(){var t=document.body.innerText,u=${JSON.stringify(home)}+'#/explore/drives',o=${JSON.stringify(location.origin)},w=window.open(u,'hitamopps'),n=0,iv=setInterval(function(){try{w.postMessage({hitamCdc:1,text:t},o)}catch(e){}if(++n>60)clearInterval(iv)},500);window.addEventListener('message',function(e){if(e.origin===o&&e.data&&e.data.hitamCdcAck){clearInterval(iv);alert('Sent to HITAM Opportunities. Check the preview in the other tab.')}})})();`;
+  return `javascript:${encodeURIComponent(code)}`;
+}
+
+function lastCdcImport() {
+  const t = allOpps().filter(o => (o.tags || [])[0] === 'From CDC Explorer' && o.postedAt).map(o => o.postedAt).sort().pop();
+  return t ? `Last import ${agoText(t)}` : 'No import yet';
+}
+
 function cdcImportHTML() {
   const r = CDCIMP.res;
-  return `<section class="panel notice-box"><div class="eyebrow"><b>Fastest way: import from CDC Explorer</b></div>
+  return `<section class="panel notice-box"><div class="row between"><div class="eyebrow"><b>Fastest way: import from CDC Explorer</b></div><span class="pill">${lastCdcImport()}</span></div>
+  <div class="callout" style="margin:12px 0"><div><b>One click, no copy and paste</b><p class="small muted">Drag this button to your bookmarks bar. Then open CDC Explorer, go to Opportunities, scroll to load the list, and click it. It runs in your own browser and sends the list here for a preview. Nothing is stored and nobody else sees your CDC page.</p></div><a class="btn acc" href="${esc(cdcBookmarklet())}" onclick="event.preventDefault();toast('Drag this button to your bookmarks bar instead of clicking it')" draggable="true">${icon('upload')}Send CDC to HITAM</a></div>
   <ol class="todo" style="margin:10px 0"><li>Open <a class="link" href="${CAMPUS_SOURCES.cdcApp}" target="_blank" rel="noopener noreferrer">CDC Explorer</a> and go to <b>Opportunities</b></li><li>Scroll to load the list, then select all (Ctrl+A) and copy (Ctrl+C)</li><li>Paste it below. Only open ones are added, each with its deadline</li></ol>
   <textarea id="cdc-in" placeholder="Paste the copied CDC Opportunities page here" aria-label="CDC Explorer text">${esc(CDCIMP.text)}</textarea>
   <div class="row"><button class="btn acc" data-act="cdc-read">${icon('spark')}Read list</button>${r ? `<span class="small muted">${r.items.length} open · ${r.skippedPast} past skipped${r.skippedUnreadable ? ` · ${r.skippedUnreadable} unreadable` : ''}</span>` : ''}</div>

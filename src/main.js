@@ -482,6 +482,17 @@ function onSubmit(e) {
 }
 
 const isTyping = t => t && (t.matches('input, textarea, select') || t.isContentEditable);
+/* One-click import: the CDC bookmarklet posts the page text here. Accept it only from CDC Explorer. */
+function onCdcMessage(e) {
+  if (e.origin !== 'https://cdc.hitam.org' || !e.data || e.data.hitamCdc !== 1 || typeof e.data.text !== 'string') return;
+  try { e.source.postMessage({ hitamCdcAck: 1 }, e.origin); } catch (err) { /* sender gone */ }
+  CDCIMP.text = e.data.text.slice(0, 500000);
+  CDCIMP.res = parseCdcText(CDCIMP.text);
+  if (current.name === 'explore' && current.arg === 'drives') rerender(); else location.hash = '#/explore/drives';
+  toast(CDCIMP.res.items.length ? `Found ${CDCIMP.res.items.length} open opportunities. Check the preview and add them.` : 'Could not read that page. Open CDC Opportunities and try again.');
+  setTimeout(() => { const d = $('#notice-details'); if (d) { d.open = true; d.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }, 400);
+}
+
 function onKeydown(e) {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); if ($('#palette').innerHTML) closePalette(); else openPalette(); return; }
   if ($('#palette').innerHTML) {
@@ -555,6 +566,7 @@ function init() {
   document.addEventListener('input', onInput);
   document.addEventListener('submit', onSubmit);
   document.addEventListener('keydown', onKeydown);
+  window.addEventListener('message', onCdcMessage);
   bindDnD();
   window.addEventListener('hashchange', route);
   renderGate();

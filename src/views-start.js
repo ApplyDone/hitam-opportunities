@@ -47,7 +47,7 @@ function viewHome() {
 </section>
 <div class="cols" style="margin-top:34px">
   <div class="stack" style="--g:34px">
-    <section>${sectionHead('At HITAM right now', hitam.length ? `${hitam.length} open` : 'campus board')}${atHitam}</section>
+    <section>${sectionHead('At HITAM right now', hitam.length ? `${hitam.length} open · ${lastCdcImport()}` : 'campus board')}${atHitam}</section>
     ${programs.length ? `<section>${sectionHead('Hackathons and programmes closing soon', 'verified dates')}${programs.slice(0, 5).map(x => miniRow(x.o, x.r, `${x.o.type} · ${x.o.org}`)).join('')}<a class="btn ghost" style="margin-top:12px" href="#/explore/hackathons">See all hackathons</a></section>` : ''}
     <section>${sectionHead('Best internships for you', interns.length ? 'newest and best matched' : '')}
       ${interns.length ? `<div class="tkts">${interns.slice(0, 4).map((x, i) => ticket(x.o, x.r, i)).join('')}</div><a class="btn ghost" style="margin-top:14px" href="#/explore/internships">See all ${interns.length} internships</a>`
