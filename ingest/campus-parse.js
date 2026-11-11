@@ -4,7 +4,7 @@
    Placement tables contain student names and roll numbers: we
    read ONLY branch, company and package, and only keep totals.
    ============================================================ */
-const BRANCH_MAP = [[/csm|ai\s*&?\s*ml|aiml/i, 'CSM'], [/csd|data science/i, 'CSD'], [/\bit\b|information tech/i, 'IT'], [/ece|electronics and comm/i, 'ECE'], [/eee|electrical/i, 'EEE'], [/mech/i, 'MECH'], [/civil/i, 'CIVIL'], [/cse|computer science/i, 'CSE']];
+const BRANCH_MAP = [[/(^|[^a-z])csc([^a-z]|$)|cyber/i, 'CSC'], [/(^|[^a-z])cso([^a-z]|$)|iot|internet of things/i, 'CSO'], [/csm|ai\s*&?\s*ml|aiml/i, 'CSM'], [/csd|data science/i, 'CSD'], [/\bit\b|information tech/i, 'IT'], [/ece|electronics and comm/i, 'ECE'], [/eee|electrical/i, 'EEE'], [/mech/i, 'MECH'], [/civil/i, 'CIVIL'], [/cse|computer science/i, 'CSE']];
 const cellText = c => c.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&nbsp;|&#\d+;/g, ' ').replace(/﻿/g, '').replace(/\s+/g, ' ').trim();
 const normBranch = b => (BRANCH_MAP.find(([re]) => re.test(b)) || [])[1] || '';
 const normCompany = c => c.replace(/\s+/g, ' ').replace(/\b(pvt|private)\.?\s*(ltd|limited)\.?$/i, '').replace(/[.,]$/, '').trim();

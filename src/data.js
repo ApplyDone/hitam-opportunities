@@ -19,7 +19,7 @@ const TYPE_BLURB = {
   Club: 'Leadership and community roles'
 };
 
-const BRANCHES = ['CSE', 'CSM', 'CSD', 'IT', 'ECE', 'EEE', 'MECH', 'CIVIL'];
+const BRANCHES = ['CSE', 'CSM', 'CSD', 'CSC', 'CSO', 'IT', 'ECE', 'EEE', 'MECH', 'CIVIL'];
 const MODES = ['Any', 'On-campus', 'Remote', 'Hybrid'];
 const LEVELS = ['Not yet', 'Learning', 'Comfortable', 'Strong'];
 

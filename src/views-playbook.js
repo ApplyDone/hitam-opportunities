@@ -37,7 +37,7 @@ function yearSection() {
   const p = YEAR_PLAN[y];
   return `<section id="pb-now" class="panel ink" style="margin-bottom:34px"><div class="eyebrow"><b>Your next 90 days</b> · ${esc(S.profile.name.trim() || 'you')}, year ${y}</div>
     <ol class="pb-now">${p.now.map(n => `<li>${esc(n)}</li>`).join('')}</ol>
-    <div class="row"><a class="btn sm acc" href="#/resume">Review my resume</a><a class="btn sm ghost" href="#/matches">See my matches</a></div></section>
+    <div class="row"><a class="btn sm acc" href="#/resume">Review my resume</a><a class="btn sm ghost" href="#/explore/internships">See my matches</a></div></section>
   <section id="pb-years">${sectionHead('Year by year', 'general pattern, confirm dates with CDC')}
     <div class="pb-years">${[1, 2, 3, 4].map(n => { const x = YEAR_PLAN[n]; return `<article class="pb-year ${n === y ? 'on' : ''}"><div class="eyebrow">${n === y ? '<b>You are here</b>' : `Year ${n}`}</div><h3 class="h3" style="font:400 1.45rem/1.1 var(--f-display)">${esc(x.title.split(' · ')[1])}</h3>
       ${[['Learn', x.learn], ['Build', x.build], ['Apply for', x.apply], ['Where', x.where]].map(([k, v]) => `<div class="pb-k">${k}</div><ul>${v.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`).join('')}</article>`; }).join('')}</div></section>`;

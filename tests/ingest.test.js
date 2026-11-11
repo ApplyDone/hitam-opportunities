@@ -16,11 +16,11 @@ test('keeps a Hyderabad fresher software role and extracts skills', () => {
   assert.deepEqual(job.years, [4]);
 });
 
-test('internships are typed Internship and open to years 2-4', () => {
+test('internships are typed Internship and open to every year', () => {
   const { job } = N.normalizeJob(raw({ title: 'Data Science Intern', text: '6 months internship with Python and pandas' }));
   assert.equal(job.type, 'Internship');
   assert.equal(job.dur, '6 months');
-  assert.deepEqual(job.years, [2, 3, 4]);
+  assert.deepEqual(job.years, [1, 2, 3, 4]);
 });
 
 test('drops senior titles, 3+ years, unknown experience, wrong city and non-tech roles', () => {
@@ -41,6 +41,17 @@ test('non-engineering operations roles are dropped even when junior', () => {
 test('India-remote roles are kept, Bengaluru onsite is not', () => {
   assert.equal(N.normalizeJob(raw({ locations: ['Remote - India'], remote: true })).job.city, 'India (remote)');
   assert.equal(N.normalizeJob(raw({ locations: ['Bengaluru, India'] })).reason, 'location');
+});
+
+test('internships are kept anywhere in India, fresher jobs only in Hyderabad or remote', () => {
+  const i = N.normalizeJob(raw({ title: 'Software Engineering Intern', locations: ['Bengaluru, India'], text: '6 months internship, Python' }));
+  assert.equal(i.reason, 'kept');
+  assert.equal(i.job.city, 'Bengaluru');
+  assert.equal(N.normalizeJob(raw({ locations: ['Pune, India'] })).reason, 'location');
+});
+
+test('1-2 years experience roles are not shown (everyone here is a fresher)', () => {
+  assert.equal(N.normalizeJob(raw({ text: 'Requires 2 years of experience in Java' })).reason, 'seniority');
 });
 
 test('years-of-experience parser', () => {

@@ -37,7 +37,6 @@ function classifyLevel(title, employmentType, text) {
   const yrs = minYearsExperience(text);
   if (yrs !== null && yrs >= 3) return null;
   if (FRESHER_RE.test(title) || yrs === 0) return 'fresher';
-  if (yrs !== null && yrs <= 2) return 'early';
   return null; // unknown experience on a non-junior title: too risky to show students
 }
 
@@ -73,10 +72,11 @@ function normalizeJob(raw) {
   if (!title) return { job: null, reason: 'no-title' };
   const text = raw.text ? String(raw.text) : stripHtml(raw.html);
   const loc = locationInfo(raw.locations || [], raw.remote);
-  if (!loc.hyd && !(loc.remote && loc.india)) return { job: null, reason: 'location' };
   if (DROP_RE.test(title)) return { job: null, reason: 'role' };
   const level = classifyLevel(title, raw.employmentType, text);
   if (!level) return { job: null, reason: 'seniority' };
+  // Freshers: Hyderabad or India-remote. Internships: anywhere in India (students can relocate for a summer or work remotely).
+  if (!loc.hyd && !(loc.remote && loc.india) && !(level === 'intern' && loc.india)) return { job: null, reason: 'location' };
   const counts = detectSkills(`${title}\n${text}`);
   const skills = Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([s]) => s).slice(0, 6);
   if (!KEEP_RE.test(title) && !(level === 'intern' && skills.length)) return { job: null, reason: 'role' };
@@ -85,7 +85,8 @@ function normalizeJob(raw) {
 
   const intern = level === 'intern';
   const months = intern ? (text.match(/(\d{1,2})\s*(?:-|–|to)?\s*(?:\d{1,2}\s*)?months?/i) || [])[1] : null;
-  const city = loc.hyd ? 'Hyderabad' : 'India (remote)';
+  const firstPlace = (raw.locations || []).filter(Boolean)[0] || '';
+  const city = loc.hyd ? 'Hyderabad' : loc.remote ? 'India (remote)' : String(firstPlace).split(',')[0].trim().slice(0, 30) || 'India';
   return {
     job: {
       id: `${raw.ats}-${raw.token}-${raw.rawId}`,
@@ -101,7 +102,7 @@ function normalizeJob(raw) {
       hrs: 0,
       skills: skills.length ? skills : ['Problem Solving', 'Communication'],
       lvl: intern ? 1 : 2,
-      years: intern ? [2, 3, 4] : [4],
+      years: intern ? [1, 2, 3, 4] : [4],
       br: 'ALL',
       track: inferTrack(title, skills),
       level,

@@ -78,7 +78,9 @@ const lowerFirst = s => (s ? s.charAt(0).toLowerCase() + s.slice(1) : s);
 function eligibility(o, p) {
   const fails = [];
   const notes = [];
-  if (!(o.br === 'ALL' || o.br.includes(p.branch))) fails.push(`Open to ${o.br.join(', ')} only`);
+  const csFamily = ['CSE', 'CSM', 'CSD', 'CSC', 'CSO'];
+  const branchOk = o.br === 'ALL' || o.br.includes(p.branch) || (csFamily.includes(p.branch) && o.br.includes('CSE'));
+  if (!branchOk) fails.push(`Open to ${o.br.join(', ')} only`);
   if (!o.years.includes(Number(p.year))) fails.push(`Open to year ${fmtYears(o.years)} only`);
   if (o.minCgpa) {
     const cg = parseFloat(p.cgpa);

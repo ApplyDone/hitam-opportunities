@@ -42,12 +42,8 @@ function setUser(u, onChange) {
 }
 
 async function initAuth(onChange) {
-  if (!APP_CONFIG.firebase) {
-    AUTH.state = 'unconfigured';
-    if (isLocalHost() && new URLSearchParams(location.search).has('preview')) { startPreview(); return; }
-    onChange();
-    return;
-  }
+  if (isLocalHost() && new URLSearchParams(location.search).has('preview')) { startPreview(); return; }
+  if (!APP_CONFIG.firebase) { AUTH.state = 'unconfigured'; onChange(); return; }
   try {
     await loadFirebase();
     if (!firebase.apps.length) firebase.initializeApp(APP_CONFIG.firebase);

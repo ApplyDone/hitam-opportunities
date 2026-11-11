@@ -78,7 +78,6 @@ let ANIM = true; // entrance animation only on navigation, never on in-place ref
 
 function ticket(o, r, i = 0) {
   const app = S.apps[o.id];
-  const cmp = S.compare.includes(String(o.id));
   const stubLabel = r.closed ? 'closed' : !r.elig.ok ? 'not open' : 'match';
   return `<article class="tkt ${ANIM ? 'rise' : ''} band-${band(r.score)} ${r.closed ? 'closed' : ''}" data-type="${o.type}" style="--i:${Math.min(i, 12)}">
   <div class="tkt-main">
@@ -89,7 +88,7 @@ function ticket(o, r, i = 0) {
     <div class="tkt-skills">${skillTags(o, r)}</div>
     <div class="tkt-act">
       <button class="btn sm ghost bm ${app ? 'on' : ''}" data-act="save" data-id="${o.id}" aria-pressed="${Boolean(app)}">${icon('bookmark')}${app ? app.st : 'Save'}</button>
-      <label class="cmp"><input type="checkbox" data-act="cmp" data-id="${o.id}" ${cmp ? 'checked' : ''}> Compare</label>${applyBtn(o)}
+      ${applyBtn(o)}
     </div>
   </div>
   <div class="tkt-stub">

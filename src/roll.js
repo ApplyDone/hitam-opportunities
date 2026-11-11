@@ -8,7 +8,7 @@
 'use strict';
 
 const ALLOWED_DOMAIN = 'hitam.org';
-const BRANCH_CODES = { '01': 'CIVIL', '02': 'EEE', '03': 'MECH', '04': 'ECE', '05': 'CSE', '12': 'IT', '66': 'CSM', '67': 'CSD' };
+const BRANCH_CODES = { '01': 'CIVIL', '02': 'EEE', '03': 'MECH', '04': 'ECE', '05': 'CSE', '12': 'IT', '62': 'CSC', '66': 'CSM', '67': 'CSD', '69': 'CSO' };
 const ROLL_RE = /^(\d{2})E5([15])A(\d{2})[0-9A-Z]{2}$/i;
 
 /** Returns {roll, admitYear, lateral, branch, gradYear, year, alumni} or null if not a student roll. */

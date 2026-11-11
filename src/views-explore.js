@@ -247,15 +247,14 @@ function submitPostForm(form) {
 /* ---------- Command palette ---------- */
 function paletteItems(q) {
   const nav = [
-    ['Campus: what is happening at HITAM', '#/campus'], ['Briefing', '#/briefing'], ['01 Student profile', '#/profile'], ['02 Resume Studio', '#/resume'], ['03 Opportunity database', '#/explore'], ['04 Discovery & matching', '#/matches'],
-    ['05 Opportunity assistant', '#/assistant'], ['06 Preparation & application', '#/prepare'], ['07 Tracking & reminders', '#/track'], ['Playbook: roadmaps & where to apply', '#/playbook'], ['Insights', '#/insights']
+    ['Home', '#/home'], ['Internships', '#/explore/internships'], ['Campus drives', '#/explore/drives'], ['Hackathons', '#/explore/hackathons'], ['Clubs & events', '#/explore/events'], ['Company jobs (optional)', '#/explore/jobs'],
+    ['Placements: who hires from HITAM', '#/placements'], ['Resume', '#/resume'], ['My applications', '#/track'], ['Profile', '#/profile'], ['Playbook', '#/playbook']
   ].map(([l, h]) => ({ grp: 'Go to', label: l, run: () => { location.hash = h; } }));
   const acts = [
     { grp: 'Actions', label: document.documentElement.dataset.theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme', run: () => toggleTheme() },
     { grp: 'Actions', label: 'Export calendar (.ics)', run: () => exportICS() },
     { grp: 'Actions', label: 'Download backup (JSON)', run: () => exportBackup() },
-    { grp: 'Actions', label: 'Post an opportunity', run: () => openModal(postFormHTML()) },
-    { grp: 'Actions', label: 'Ask the assistant', run: () => { location.hash = '#/assistant'; } }
+    { grp: 'Actions', label: 'Add a notice (WhatsApp / email)', run: () => { location.hash = '#/explore/drives'; setTimeout(() => ACTIONS['op-notice'](), 250); } },
   ];
   const t = q.trim().toLowerCase();
   const opps = allOpps().filter(o => !t || [o.title, o.org, o.type, ...o.skills].join(' ').toLowerCase().includes(t))

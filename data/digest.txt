@@ -1,32 +1,40 @@
 HITAM Opportunities
-*13 new openings today* (2026-11-11)
+*17 new openings today* (2026-11-11)
 Hyderabad + India-remote, internships and 0–2 years only.
 
-• Servicenow Configuration Analyst — Experian, Hyderabad
-  https://jobs.smartrecruiters.com/Experian/744000160802209
+• [Intern] DE Intern + SDE Trainee - Off Campus Hiring 2026 — Sigmoid, Bengaluru
+  https://job-boards.greenhouse.io/sigmoid/jobs/8927991002
+• [Intern] Product Management Intern — Rubrik, Bangalore
+  https://www.rubrik.com/company/careers/departments/job.8345283?gh_jid=8345283
+• [Intern] AI Researcher Intern — HackerRank, Onsite in Bangalore
+  https://job-boards.greenhouse.io/hackerrank/jobs/8281055
 • Junior Service Desk Analyst — Endava, Hyderabad
   https://jobs.smartrecruiters.com/Endava/744000158205354
-• Software Development Engineer - Java + Distributed Systems — Zscaler, Hyderabad
-  https://job-boards.greenhouse.io/zscaler/jobs/5261571007
+• [Intern] Apprentice (R-20025) — Dun & Bradstreet, Mumbai - India
+  https://jobs.lever.co/dnb/a61b6368-4c4f-4e1b-b125-d0d7ba7f8278
 • Associate Security Engineer - 11925 — Coupa, India (remote)
   https://jobs.lever.co/coupa/15c1666e-c0df-49b5-8296-8c664166413a
+• [Intern] Software Development Engineer Intern — HackerRank, Onsite in Bangalore
+  https://job-boards.greenhouse.io/hackerrank/jobs/8229735
+• [Intern] Associate Software Development Engineer (SDE) Intern — Hevo Data, Bangalore
+  https://jobs.lever.co/hevodata/993a3ed3-3014-432f-b0f4-28d300d58d9a
 • [Intern] Junior AI Engineer — TrackMind, Hyderabad
   https://jobs.lever.co/trackmind/ad66c0ec-1ae9-47cb-9d5d-83ae1cb6d200
-• Airflow Python Developer — Sutherland, Hyderabad
-  https://jobs.smartrecruiters.com/Sutherland/744000145952419
-• Functional Consultant (M&A) — HighRadius, Hyderabad
-  https://www.highradius.com/about/careers-list/?gh_jid=7732917003
-• Design Implementation Consultant (AP) — HighRadius, Hyderabad
-  https://www.highradius.com/about/careers-list/?gh_jid=7825675003
-• Functional Consultant — HighRadius, Hyderabad
-  https://www.highradius.com/about/careers-list/?gh_jid=7585933003
-• Machine Learning Engineer — Coinbase, India (remote)
-  https://www.coinbase.com/careers/positions/7985187?gh_jid=7985187
-• Quality Analyst — HighRadius, Hyderabad
-  https://www.highradius.com/about/careers-list/?gh_jid=7564206003
-• Forward Deployed Engineer (AP) — HighRadius, Hyderabad
-  https://www.highradius.com/about/careers-list/?gh_jid=7601743003
-• Calling all Software Engineers! — ValGenesis, Hyderabad
-  https://jobs.lever.co/valgenesis/f2d220b5-abc4-4dc7-b00c-c6b657768739
+• [Intern] Software Engineer (CPD) - Winter Intern — Rubrik, Bangalore
+  https://www.rubrik.com/company/careers/departments/job.8166537?gh_jid=8166537
+• [Intern] ENG Project/ Program - Intern — Rubrik, Bangalore
+  https://www.rubrik.com/company/careers/departments/job.8166514?gh_jid=8166514
+• [Intern] Operations Associate, Apprenticeship — Stripe, Bengaluru
+  https://stripe.com/jobs/search?gh_jid=8131339
+• [Intern] Industrial Trainee - Finance & Accounting — Sigmoid, Bengaluru
+  https://job-boards.greenhouse.io/sigmoid/jobs/8713069002
+• [Intern] Security Consultant Intern — CloudSEK, Bengaluru
+  https://job-boards.greenhouse.io/cloudsek/jobs/6115382004
+• [Intern] Software Engineer, Intern — Stripe, Bengaluru
+  https://stripe.com/jobs/search?gh_jid=8031833
+• [Intern] UX Design Intern — Hevo Data, Bangalore
+  https://jobs.lever.co/hevodata/433ffdef-3125-48ed-a131-52c697c321ee
+• [Intern] UX Design - Intern — Glance, Bengaluru
+  https://job-boards.greenhouse.io/glance/jobs/7916115
 
 Full list, match scores and resume help: open the HITAM Opportunities app.

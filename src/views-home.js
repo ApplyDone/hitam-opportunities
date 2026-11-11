@@ -102,7 +102,7 @@ function viewBriefing() {
     ${!S.resume ? `<section class="panel ink"><div class="eyebrow"><b>Biggest upgrade</b></div><div class="h2" style="margin:10px 0 6px">Upload your resume</div><p class="small muted">It fills your skills, re-ranks every listing and tells you exactly what to fix. Read in your browser, never uploaded.</p><a class="btn sm acc" style="margin-top:12px" href="#/resume">Open Resume Studio</a></section>` : ''}
     ${LIVE.jobs.length ? `<section class="panel">${sectionHead('Live company jobs', `${LIVE.jobs.length} open`)}${rk.filter(x => x.o.live && x.r.elig.ok).slice(0, 4).map(x => miniRow(x.o, x.r, `${x.o.org} · ${x.o.city}`)).join('') || '<p class="muted small">None match your year yet. Internships open from year 2.</p>'}<button class="btn sm ghost" style="margin-top:12px" data-act="f-live-new">See all live jobs</button></section>` : ''}
     <section class="panel">${sectionHead('Closing soon', `${closing.length} this week`)}${closingRail}</section>
-    ${gap ? `<section class="panel ink"><div class="eyebrow"><b>Next best skill</b></div><div class="h2" style="margin:10px 0 6px">${esc(gap.skill)} <em>to ${LEVELS[gap.target].toLowerCase()}</em></div><p class="small muted">Lifts ${gap.ids.length} listing${gap.ids.length > 1 ? 's' : ''} by ${gap.delta} points in total${gap.unlocks ? ` and moves ${gap.unlocks} into strong-match range` : ''}.</p><p class="small" style="margin:10px 0 14px">${esc(gap.learn)}.</p><a class="btn sm ghost" href="#/matches">See the full roadmap</a></section>` : ''}
+    ${gap ? `<section class="panel ink"><div class="eyebrow"><b>Next best skill</b></div><div class="h2" style="margin:10px 0 6px">${esc(gap.skill)} <em>to ${LEVELS[gap.target].toLowerCase()}</em></div><p class="small muted">Lifts ${gap.ids.length} listing${gap.ids.length > 1 ? 's' : ''} by ${gap.delta} points in total${gap.unlocks ? ` and moves ${gap.unlocks} into strong-match range` : ''}.</p><p class="small" style="margin:10px 0 14px">${esc(gap.learn)}.</p><a class="btn sm ghost" href="#/explore/internships">See the full roadmap</a></section>` : ''}
     <section class="panel">${sectionHead('Your pipeline', `${Object.keys(S.apps).length} tracked`)}${Object.keys(S.apps).length ? pipelineFunnel() : '<p class="muted small">Save a listing and it lands here.</p>'}<a class="btn sm ghost" style="margin-top:14px" href="#/track">Open tracker</a></section>
     ${strength < 100 ? `<section class="panel"><div class="eyebrow">Sharper matches</div><ul class="todo" style="color:var(--ink-2)">${profileTodo(p).slice(0, 3).map(t => `<li>${t}</li>`).join('')}</ul><a class="btn sm ghost" style="margin-top:14px" href="#/profile">Complete profile</a></section>` : ''}
   </aside>
@@ -178,7 +178,7 @@ function viewProfile() {
         <div class="field"><label class="lbl" for="f-project">One project you are proud of</label><input id="f-project" type="text" data-in="project" value="${esc(p.project)}" placeholder="e.g. a weather app in JavaScript"></div>
       </div>
     </section>
-    <div class="row"><a class="btn acc" href="#/explore">Save and browse opportunities ${icon('arrow')}</a><a class="btn ghost" href="#/matches">Jump to my matches</a></div>
+    <div class="row"><a class="btn acc" href="#/explore">Save and browse opportunities ${icon('arrow')}</a><a class="btn ghost" href="#/explore/internships">Jump to my matches</a></div>
   </div>
   <aside class="stack sticky" style="--g:20px">
     <div id="idcard">${idCardHTML()}</div>

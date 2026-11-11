@@ -3,15 +3,11 @@
    ============================================================ */
 'use strict';
 
-const VIEWS = { campus: viewCampus, briefing: viewBriefing, profile: viewProfile, resume: viewResume, playbook: viewPlaybook, explore: viewExplore, matches: viewMatches, assistant: viewAssistant, prepare: viewPrepare, track: viewTrack, insights: viewInsights };
-const TITLES = { campus: 'Campus', briefing: 'For you', profile: 'Profile', resume: 'Resume', playbook: 'Playbook', explore: 'Opportunities', matches: 'Matches', assistant: 'Assistant', prepare: 'Prepare', track: 'Applications', insights: 'Insights' };
-const NAV_GROUPS = [
-  ['', [['campus', 'Campus', 'home'], ['briefing', 'For you', 'spark']]],
-  ['Opportunities', [['explore', 'Browse', 'search'], ['matches', 'Matches', 'target'], ['track', 'Applications', 'board']]],
-  ['Get ready', [['resume', 'Resume', 'file'], ['prepare', 'Prepare', 'check'], ['assistant', 'Assistant', 'send'], ['playbook', 'Playbook', 'map']]],
-  ['You', [['profile', 'Profile', 'user'], ['insights', 'Insights', 'grid']]]
-];
-const TABBAR = [['campus', 'Campus', 'home'], ['explore', 'Browse', 'search'], ['resume', 'Resume', 'file'], ['track', 'Applied', 'board'], ['profile', 'You', 'user']];
+const VIEWS = { home: viewHome, explore: viewOpps, placements: viewPlacements, resume: viewResume, track: viewTrack, profile: viewProfile, prepare: viewPrepare, playbook: viewPlaybook };
+const TITLES = { home: 'Home', explore: 'Opportunities', placements: 'Placements', resume: 'Resume', track: 'Applications', profile: 'Profile', prepare: 'Prepare', playbook: 'Playbook' };
+const NAV_ITEMS = [['home', 'Home', 'home'], ['explore', 'Opportunities', 'search'], ['placements', 'Placements', 'target'], ['resume', 'Resume', 'file'], ['track', 'Applications', 'board']];
+const NAV_GROUPS = [['', NAV_ITEMS]];
+const TABBAR = NAV_ITEMS;
 const STAGE_NAV = [];
 
 let current = { name: '', arg: '' };
@@ -24,7 +20,7 @@ function parseRoute() {
   const h = location.hash.replace(/^#\/?/, '');
   const [pathPart, qs = ''] = h.split('?');
   const seg = pathPart.split('/').filter(Boolean);
-  return { name: VIEWS[seg[0]] ? seg[0] : 'campus', arg: seg[1] || '', q: new URLSearchParams(qs) };
+  return { name: VIEWS[seg[0]] ? seg[0] : 'home', arg: seg[1] || '', q: new URLSearchParams(qs) };
 }
 const basePath = r => `#/${r.name}${r.arg ? '/' + r.arg : ''}`;
 
@@ -79,7 +75,7 @@ function shellHTML() {
   return `
 <div class="app">
   <aside class="side" aria-label="Main navigation">
-    <a class="brand" href="#/campus" aria-label="HITAM Opportunities, campus">${BRAND_MARK}<span class="brand-t"><b>HITAM</b><span>Opportunities</span></span></a>
+    <a class="brand" href="#/home" aria-label="HITAM Opportunities, campus">${BRAND_MARK}<span class="brand-t"><b>HITAM</b><span>Opportunities</span></span></a>
     <nav class="nav" id="nav"></nav>
     <div class="me" id="me"></div>
   </aside>
@@ -94,7 +90,6 @@ function shellHTML() {
 }
 
 function navBadge(key) {
-  if (key === 'campus') { const n = allOpps().filter(o => !o.live && !isClosed(o) && daysLeft(o) <= 3).length; return n ? `<span class="badge hot">${n}</span>` : ''; }
   if (key === 'track') { const n = Object.keys(S.apps).length; return n ? `<span class="badge">${n}</span>` : ''; }
   if (key === 'resume' && !S.resume) return '<span class="dot" title="Upload your resume"></span>';
   return '';
@@ -320,7 +315,7 @@ const ACTIONS = {
     const before = strongCount(S.profile);
     setProfile(patch); renderTools();
     toast(`Profile updated. Strong matches: ${before} \u2192 ${strongCount(S.profile)}`);
-    location.hash = '#/matches';
+    location.hash = '#/explore/internships';
   },
   'rs-delete': () => { if (!confirm('Delete the resume text stored in this browser?')) return; commit({ resume: null }); RS.phase = 'idle'; rerender(); toast('Resume deleted from this browser'); },
   'rs-tailor': el => { RS.tailorId = el.value; const box = $('#rs-tailor-box'); if (box) box.innerHTML = tailorHTML(parseResume(S.resume.text, { pages: S.resume.pages })); },
@@ -330,6 +325,13 @@ const ACTIONS = {
   'pb-mine': el => { PB.mine = el.checked; rerender(); },
   'notice-read': () => { const t = $('#notice-in'); NOTICE.text = t ? t.value : ''; if (!NOTICE.text.trim()) { toast('Paste a notice first'); return; } NOTICE.parsed = parseNotice(NOTICE.text); rerender(); },
   'notice-clear': () => { NOTICE.text = ''; NOTICE.parsed = null; rerender(); },
+  'op-sort': el => { OP.sort = el.value; refreshOps(); },
+  'op-mine': el => { OP.mine = el.checked; refreshOps(); },
+  'op-paid': el => { OP.paid = el.checked; refreshOps(); },
+  'op-remote': el => { OP.remote = el.checked; refreshOps(); },
+  'op-all': () => { OP.mine = false; rerender(); },
+  'op-notice': () => { const d = $('#notice-details'); if (d) { d.open = true; d.scrollIntoView({ behavior: 'smooth', block: 'center' }); } },
+  'pl-branch': el => { PL.branch = el.dataset.id; rerender(); },
   'f-sort': el => { setFilters({ sort: el.value }); refreshResults(); },
   'f-reset': () => { commit({ filters: { ...DEFAULT_FILTERS } }); const q = $('#q'); if (q) q.value = ''; refreshResults(); },
   'f-clear': el => {
@@ -377,7 +379,7 @@ const ACTIONS = {
   'reset-all': () => {
     if (!confirm('Erase your profile, tracker, notes and test results stored in this browser?')) return;
     try { localStorage.removeItem(STORE_KEY); } catch (err) { /* ignore */ }
-    S = freshState(); persist(); renderTools(); location.hash = '#/briefing'; rerender(); toast('All data reset');
+    S = freshState(); persist(); renderTools(); location.hash = '#/home'; rerender(); toast('All data reset');
   },
 
   'print-report': () => window.print(),
@@ -418,6 +420,9 @@ function onInput(e) {
     setProfile({ [d.in]: v });
     refreshIdCard();
     if (d.in === 'name') { const av = $('.avatar'); if (av) av.textContent = initial(S.profile); }
+  } else if (d.inOp) {
+    OP.q = el.value;
+    refreshOps();
   } else if (d.inFilter) {
     setFilters({ [d.inFilter]: el.value });
     const r = $('#results'); if (r) r.innerHTML = resultsHTML();

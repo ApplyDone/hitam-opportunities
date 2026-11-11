@@ -5,7 +5,7 @@ const path = require('node:path');
 
 const SRC = path.join(__dirname, 'src');
 const OUT_DIR = path.join(__dirname, 'dist');
-const ORDER = ['data.js', 'skills-dict.js', 'directory.js', 'engine.js', 'assistant.js', 'store.js', 'roll.js', 'config.js', 'auth.js', 'ui.js', 'views-home.js', 'views-explore.js', 'views-match.js', 'views-work.js', 'views-more.js', 'notice.js', 'views-campus.js', 'resume.js', 'views-resume.js', 'views-playbook.js', 'main.js'];
+const ORDER = ['data.js', 'skills-dict.js', 'directory.js', 'engine.js', 'assistant.js', 'store.js', 'roll.js', 'config.js', 'auth.js', 'ui.js', 'views-home.js', 'views-explore.js', 'views-match.js', 'views-work.js', 'views-more.js', 'campus-info.js', 'notice.js', 'views-campus.js', 'views-opps.js', 'views-start.js', 'resume.js', 'views-resume.js', 'views-playbook.js', 'main.js'];
 
 const read = f => fs.readFileSync(path.join(SRC, f), 'utf8');
 const css = read('theme.css');

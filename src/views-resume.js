@@ -169,7 +169,7 @@ function resultsHTML_rs() {
     <div class="eyebrow"><b>What your resume changes</b></div>
     <div class="rs-ba"><div><span class="big-n">${before}</span><span class="lbl">strong matches now</span></div><span class="rs-arrow">${icon('arrow')}</span><div><span class="big-n acc">${after}</span><span class="lbl">after update</span></div></div>
     ${diff.length ? `<div class="chips">${diff.slice(0, 9).map(d => `<span class="tag">${esc(d.field)}: ${esc(d.to)}</span>`).join('')}${diff.length > 9 ? `<span class="tag">+${diff.length - 9} more</span>` : ''}</div>
-    <button class="btn acc" data-act="rs-apply">${icon('check')}Update my profile with this</button>` : '<p class="small">Your profile already reflects this resume.</p><a class="btn ghost" href="#/matches">See my matches</a>'}
+    <button class="btn acc" data-act="rs-apply">${icon('check')}Update my profile with this</button>` : '<p class="small">Your profile already reflects this resume.</p><a class="btn ghost" href="#/explore/internships">See my matches</a>'}
   </div>
 </article>
 <div class="cols" style="margin-top:40px">

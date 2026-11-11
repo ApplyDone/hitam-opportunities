@@ -151,7 +151,7 @@ function viewTrack() {
   <p class="lede">Move each application through its stages. Reminders cover the next seven days, and the calendar export puts every deadline on your phone.</p>
 </header>`;
   if (!ids.length) {
-    return head + emptyBox('Nothing tracked yet', 'Save a listing from the database or your matches, and it appears here with reminders.', '<div class="row" style="justify-content:center"><a class="btn acc" href="#/matches">See my matches</a><a class="btn ghost" href="#/explore">Browse listings</a><label class="btn ghost">Restore backup<input type="file" accept="application/json" data-act="restore" hidden></label></div>');
+    return head + emptyBox('Nothing tracked yet', 'Save a listing from the database or your matches, and it appears here with reminders.', '<div class="row" style="justify-content:center"><a class="btn acc" href="#/explore/internships">See my matches</a><a class="btn ghost" href="#/explore">Browse listings</a><label class="btn ghost">Restore backup<input type="file" accept="application/json" data-act="restore" hidden></label></div>');
   }
   const rem = reminders();
   const moved = ids.filter(i => S.apps[i].st !== 'Saved').length;

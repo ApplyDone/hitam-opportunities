@@ -142,7 +142,7 @@ function replyGaps(ctx, now) {
   const gaps = skillGaps(ctx.opps, ctx.profile, ctx.weights, now).slice(0, 4);
   if (!gaps.length) return { text: 'You already meet the bar for the skills in your open, eligible listings. Raise your levels in your profile for stretch roles.', follow: ['Show my best matches'] };
   const lines = gaps.map((g, i) => `${i + 1}. ${bold(g.skill)} to ${LEVELS[g.target].toLowerCase()}: +${g.delta} points across ${g.ids.length} listing${g.ids.length > 1 ? 's' : ''}${g.unlocks ? `, moves ${g.unlocks} into strong-match territory` : ''}.\n   Try: ${g.learn}.`).join('\n');
-  return { text: `These skills lift your matches the most:\n${lines}`, actions: [{ label: 'Open skill roadmap', href: '#/matches' }], follow: ['Show my best matches'] };
+  return { text: `These skills lift your matches the most:\n${lines}`, actions: [{ label: 'Open skill roadmap', href: '#/explore/internships' }], follow: ['Show my best matches'] };
 }
 
 function replyPrep(ctx, e, now) {

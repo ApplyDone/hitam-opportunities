@@ -21,6 +21,11 @@ test('branch codes match real HITAM placement records', () => {
   assert.equal(parseRoll('24E51A6701', NOV_2026).branch, 'CSD');
 });
 
+test('CSC and CSO codes match HITAM placement records', () => {
+  assert.equal(parseRoll('22E51A6250', NOV_2026).branch, 'CSC');
+  assert.equal(parseRoll('22E51A6924', NOV_2026).branch, 'CSO');
+});
+
 test('lateral entry graduates a year earlier; finished batches are alumni', () => {
   const r = parseRoll('25E55A0215', NOV_2026);
   assert.equal(r.lateral, true);

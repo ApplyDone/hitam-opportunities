@@ -143,3 +143,10 @@ test('formatting helpers', () => {
   assert.equal(A.payLabel(['stipend', 8000]), '₹8,000 / month');
   assert.equal(A.payLabel(['ctc', 6.5]), '₹6.5 LPA');
 });
+
+test('CSE-family branches (CSM, CSD, CSC, CSO) are eligible for CSE listings', () => {
+  const p = { ...A.BLANK_PROFILE, branch: 'CSO', year: 3 };
+  const o = { id: 'x', type: 'Internship', title: 't', org: 'o', d: 5, skills: ['Python'], lvl: 1, years: [3], br: ['CSE', 'IT'], mode: 'Remote', pay: ['none'] };
+  assert.equal(A.eligibility(o, p).ok, true);
+  assert.equal(A.eligibility(o, { ...p, branch: 'MECH' }).ok, false);
+});
