@@ -23,13 +23,33 @@ const freshState = () => ({
 });
 
 /* Live company jobs: loaded from the embedded snapshot or data/jobs.json, never persisted in localStorage. */
-let LIVE = { jobs: [], meta: null };
+let LIVE = { jobs: [], meta: null, parts: {}, times: {} };
+let PROGRAMS = [];
 const isHttpUrl = u => { try { const x = new URL(u); return x.protocol === 'https:' || x.protocol === 'http:'; } catch (e) { return false; } };
-function setLiveData(data) {
+function setLiveData(data, part = 'ats') {
   if (!data || !Array.isArray(data.jobs)) return false;
   const jobs = data.jobs.filter(j => j && j.id && j.title && TYPES.includes(j.type) && Array.isArray(j.skills) && Array.isArray(j.years) && Array.isArray(j.pay) && isHttpUrl(j.applyUrl))
     .map(j => ({ ...j, live: true, skills: j.skills.filter(s => SKILLS.includes(s)).concat(j.skills.some(s => SKILLS.includes(s)) ? [] : ['Problem Solving']) }));
-  LIVE = { jobs, meta: { generatedAt: data.generatedAt, counts: data.counts || {}, sources: (data.sources || []).length } };
+  const parts = { ...LIVE.parts, [part]: jobs };
+  const meta = { generatedAt: data.generatedAt, counts: data.counts || {}, sources: (data.sources || []).length };
+  LIVE = { jobs: Object.values(parts).flat(), parts, meta: part === 'ats' ? meta : (LIVE.meta || meta), times: { ...LIVE.times, [part]: data.generatedAt } };
+  return true;
+}
+
+/* Curated official programs (hackathons, student programmes) with verified dates. */
+function setProgramsData(data) {
+  if (!Array.isArray(data)) return false;
+  const modeOf = m => ({ Online: 'Remote', Hybrid: 'Hybrid', Onsite: 'On-site', 'On-campus': 'On-campus' }[m] || 'Remote');
+  PROGRAMS = data.filter(p => p && p.id && p.title && TYPES.includes(p.type) && isHttpUrl(p.applyUrl)).map(p => {
+    const sk = Object.keys(detectSkills(`${p.title} ${p.desc || ''}`)).filter(s => SKILLS.includes(s)).slice(0, 4);
+    return {
+      id: `prog-${p.id}`, program: true, type: p.type, title: String(p.title).slice(0, 110), org: String(p.org || '').slice(0, 80),
+      deadline: p.deadline || undefined, startDate: p.startDate || undefined, mode: modeOf(p.mode), city: String(p.location || 'India').slice(0, 60), location: String(p.location || ''),
+      pay: p.prize ? ['prize', String(p.prize).slice(0, 70)] : ['unknown'], skills: sk.length ? sk : ['Problem Solving'], lvl: 1, years: [1, 2, 3, 4], br: 'ALL',
+      dur: p.startDate ? `Starts ${p.startDate}` : p.rolling ? 'Rolling' : 'See listing', hrs: 0, track: ['sw'], tags: ['Official programme'], desc: `${p.desc || ''} ${p.eligibility ? `Who can join: ${p.eligibility}` : ''}`.trim().slice(0, 1200),
+      applyUrl: p.applyUrl, sourceUrl: p.sourceUrl, postedAt: p.verifiedAt ? `${p.verifiedAt}T00:00:00Z` : null
+    };
+  });
   return true;
 }
 
@@ -96,7 +116,7 @@ function setSkill(name, level) {
 function toggleIn(list, v) { return list.includes(v) ? list.filter(x => x !== v) : [...list, v]; }
 function setFilters(patch) { commit({ filters: { ...S.filters, ...patch } }); }
 
-const allOpps = () => [...(AUTH.state === 'preview' ? SEED : []), ...S.custom, ...NOTICES, ...LIVE.jobs];
+const allOpps = () => [...(AUTH.state === 'preview' ? SEED : []), ...S.custom, ...NOTICES, ...PROGRAMS, ...LIVE.jobs];
 const oppById = id => allOpps().find(o => String(o.id) === String(id));
 const personaProfile = id => {
   const p = PERSONAS.find(x => x.id === id).profile;

@@ -25,35 +25,51 @@ function viewHome() {
   const y = Number(p.year) || 1;
   const rk = rankOpps(allOpps(), p, S.weights).filter(x => !x.r.closed && x.r.elig.ok);
   const interns = rk.filter(x => x.o.type === 'Internship');
-  const closing = rk.filter(x => !x.o.live && Number.isFinite(x.r.dl) && x.r.dl <= 10).sort((a, b) => a.r.dl - b.r.dl).slice(0, 3);
+  const hitam = rk.filter(x => isHitamListing(x.o)).sort((a, b) => a.r.dl - b.r.dl);
+  const programs = rk.filter(x => x.o.program).sort((a, b) => a.r.dl - b.r.dl);
   const st = CAMPUS && CAMPUS.placements ? CAMPUS.placements.stats : null;
   let resumeLine = 'Upload once, see what to fix';
   if (S.resume) { const sc = scoreResume(parseResume(S.resume.text, { pages: S.resume.pages }), { demand: [] }); resumeLine = `Your score: ${sc.score}/100`; }
-  const nHack = allOpps().filter(o => o.type === 'Hackathon' && !isClosed(o)).length;
+  const atHitam = hitam.length
+    ? `<div class="tkts">${hitam.slice(0, 4).map((x, i) => ticket(x.o, x.r, i)).join('')}</div>${hitam.length > 4 ? '<a class="btn ghost" style="margin-top:14px" href="#/explore/drives">See all at HITAM</a>' : ''}`
+    : `<section class="callout"><div><b>Nothing posted for HITAM yet.</b><p class="small muted">Official drives live inside CDC Explorer. Copy your CDC Opportunities page once and import it: every student here then sees them with deadlines.</p></div><a class="btn acc" href="#/explore/drives" data-act="go-import">Import from CDC</a></section>`;
   return `
 <header class="page-head">
   <div class="eyebrow">${esc(p.branch)} · Year ${y}</div>
   <h1 class="h1">${greeting()}${first ? `, <em>${esc(first)}.</em>` : '.'}</h1>
-  <p class="lede">Everything about internships and placements at HITAM, in one place. What do you need today?</p>
+  <p class="lede">HITAM Opportunities Intelligence: campus drives, internships and hackathons for HITAM students, ranked for you.</p>
 </header>
 <section class="start-grid">
-  ${startCard('#/explore/internships', 'search', 'Find an internship', `${interns.length} open for you`, 'Live roles and campus posts')}
-  ${startCard('#/placements', 'target', 'See HITAM placements', st ? `${st.offers} offers` : 'Records', st ? `${st.companies} companies hired from HITAM` : 'Who hires from HITAM')}
+  ${startCard('#/explore/internships', 'search', 'Internships', `${interns.length} open for you`, 'HITAM posts, programmes and live roles')}
+  ${startCard('#/explore/drives', 'spark', 'Campus drives and events', `${hitam.length} at HITAM now`, 'From CDC and student posts')}
+  ${startCard('#/placements', 'target', 'HITAM placements', st ? `${st.offers} offers` : 'Records', st ? `${st.companies} companies hired from HITAM` : 'Who hires from HITAM')}
   ${startCard('#/resume', 'file', 'Fix my resume', resumeLine, 'Score, fixes, keyword match')}
-  ${startCard('#/explore/hackathons', 'spark', 'Hackathons and clubs', `${nHack} hackathon${nHack === 1 ? '' : 's'} open`, 'Build your profile on campus')}
 </section>
 <div class="cols" style="margin-top:34px">
   <div class="stack" style="--g:34px">
-    <section>${sectionHead('Best internships for you', interns.length ? 'ranked for your skills' : '')}
-      ${interns.length ? `<div class="tkts">${interns.slice(0, 4).map((x, i) => ticket(x.o, x.r, i)).join('')}</div><a class="btn ghost" style="margin-top:14px" href="#/explore/internships">See all ${interns.length}</a>`
-        : emptyBox('No internships open for you yet', 'Check back tomorrow morning, or add one you heard about.', '<a class="btn" href="#/explore/internships">Open internships</a>')}</section>
-    ${closing.length ? `<section>${sectionHead('Closing soon on campus', 'next 10 days')}${closing.map(x => miniRow(x.o, x.r, `${x.o.type} · ${x.o.org}`)).join('')}</section>` : ''}
+    <section>${sectionHead('At HITAM right now', hitam.length ? `${hitam.length} open` : 'campus board')}${atHitam}</section>
+    ${programs.length ? `<section>${sectionHead('Hackathons and programmes closing soon', 'verified dates')}${programs.slice(0, 5).map(x => miniRow(x.o, x.r, `${x.o.type} · ${x.o.org}`)).join('')}<a class="btn ghost" style="margin-top:12px" href="#/explore/hackathons">See all hackathons</a></section>` : ''}
+    <section>${sectionHead('Best internships for you', interns.length ? 'newest and best matched' : '')}
+      ${interns.length ? `<div class="tkts">${interns.slice(0, 4).map((x, i) => ticket(x.o, x.r, i)).join('')}</div><a class="btn ghost" style="margin-top:14px" href="#/explore/internships">See all ${interns.length} internships</a>`
+        : emptyBox('No internships open for you yet', 'New ones are added every 6 hours.', '<a class="btn" href="#/explore/internships">Open internships</a>')}</section>
   </div>
   <aside class="stack sticky" style="--g:18px">
     ${calendarCard(y, currentSemester())}
     ${S.resume ? '' : `<section class="panel ink"><div class="eyebrow"><b>Biggest upgrade</b></div><div class="h3" style="margin:6px 0">Upload your resume</div><p class="small muted">It fills your skills and ranks every opportunity for you. Read on your device only.</p><a class="btn sm acc" style="margin-top:12px" href="#/resume">Upload resume</a></section>`}
+    <section class="panel"><div class="eyebrow">More tools</div><div class="chips" style="margin-top:10px"><a class="chip" href="#/roadmap">Skill roadmap</a><a class="chip" href="#/assistant">Ask the assistant</a><a class="chip" href="#/playbook">Where to apply</a><a class="chip" href="#/profile">My profile</a></div></section>
   </aside>
 </div>`;
+}
+
+function viewRoadmap() {
+  const demand = Object.entries(liveSkillDemand()).sort((a, b) => b[1] - a[1]).slice(0, 12);
+  const maxD = Math.max(1, ...demand.map(x => x[1]));
+  return `
+<header class="page-head"><div class="eyebrow">Skill roadmap</div><h1 class="h1">What to learn next, <em>to get more.</em></h1>
+<p class="lede">Each skill is scored by how many more opportunities it would open for you. Mark a skill when you reach the level, and the whole app re-ranks.</p></header>
+<div class="cols"><section class="panel">${sectionHead('Biggest lifts', 'for your profile')}<div id="roadmap">${roadmapHTML()}</div></section>
+<aside class="stack" style="--g:18px"><section class="panel">${sectionHead('Skills live postings ask for', 'today')}${demand.length ? demand.map(([s, n]) => `<div class="hbar" style="--tc:var(--brand)"><span>${esc(s)}${(S.profile.skills[s] || 0) ? ' ✓' : ''}</span><div class="bar"><i style="width:${(n / maxD) * 100}%"></i></div><b class="mono">${n}</b></div>`).join('') : '<p class="muted small">Live postings are loading.</p>'}<p class="tiny muted" style="margin-top:8px">From live internship and job postings. A tick means you already rate it.</p></section>
+<section class="panel"><a class="btn sm" href="#/resume">Upload resume to fill skills</a></section></aside></div>`;
 }
 
 /* ---------- Placements ---------- */

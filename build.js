@@ -5,7 +5,7 @@ const path = require('node:path');
 
 const SRC = path.join(__dirname, 'src');
 const OUT_DIR = path.join(__dirname, 'dist');
-const ORDER = ['data.js', 'skills-dict.js', 'directory.js', 'engine.js', 'assistant.js', 'store.js', 'roll.js', 'config.js', 'auth.js', 'ui.js', 'views-home.js', 'views-explore.js', 'views-match.js', 'views-work.js', 'views-more.js', 'campus-info.js', 'notice.js', 'views-campus.js', 'views-opps.js', 'views-start.js', 'resume.js', 'views-resume.js', 'views-playbook.js', 'main.js'];
+const ORDER = ['data.js', 'skills-dict.js', 'directory.js', 'engine.js', 'assistant.js', 'store.js', 'roll.js', 'config.js', 'auth.js', 'ui.js', 'views-home.js', 'views-explore.js', 'views-match.js', 'views-work.js', 'views-more.js', 'campus-info.js', 'cdc-import.js', 'notice.js', 'views-campus.js', 'views-opps.js', 'views-start.js', 'resume.js', 'views-resume.js', 'views-playbook.js', 'main.js'];
 
 const read = f => fs.readFileSync(path.join(SRC, f), 'utf8');
 const css = read('theme.css');
@@ -17,6 +17,8 @@ const JOBS_FILE = path.join(__dirname, 'data', 'jobs.json');
 const jobsJson = fs.existsSync(JOBS_FILE) ? fs.readFileSync(JOBS_FILE, 'utf8') : '';
 const CAMPUS_FILE = path.join(__dirname, 'data', 'campus.json');
 const campusTag = fs.existsSync(CAMPUS_FILE) ? `<script id="campus-data" type="application/json">${JSON.stringify(JSON.parse(fs.readFileSync(CAMPUS_FILE, 'utf8'))).replace(/</g, '\\u003c')}</script>` : '';
+const PROGRAMS_FILE = path.join(__dirname, 'data', 'programs.json');
+const programsTag = fs.existsSync(PROGRAMS_FILE) ? `<script id="programs-data" type="application/json">${JSON.stringify(JSON.parse(fs.readFileSync(PROGRAMS_FILE, 'utf8'))).replace(/</g, '\\u003c')}</script>` : '';
 const liveTag = jobsJson ? `<script id="live-jobs" type="application/json">${JSON.stringify(JSON.parse(jobsJson)).replace(/</g, '\\u003c')}</script>` : '';
 
 const html = `<!DOCTYPE html>
@@ -24,7 +26,7 @@ const html = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>HITAM Opportunities</title>
+<title>HITAM Opportunities Intelligence</title>
 <meta name="description" content="Find, match, prepare for and track campus opportunities at HITAM.">
 <meta name="theme-color" content="#f6f6f3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,6 +39,7 @@ ${css}
 <body>
 <div id="app"></div>
 ${campusTag}
+${programsTag}
 ${liveTag}
 <noscript>This app needs JavaScript.</noscript>
 <script>
@@ -53,7 +56,7 @@ fs.writeFileSync(out, html, 'utf8');
 const SITE = path.join(__dirname, 'site');
 fs.mkdirSync(path.join(SITE, 'data'), { recursive: true });
 fs.writeFileSync(path.join(SITE, 'index.html'), html, 'utf8');
-['jobs.json', 'campus.json', 'digest.txt'].forEach(f => {
+['jobs.json', 'campus.json', 'remote.json', 'programs.json', 'digest.txt'].forEach(f => {
   const src = path.join(__dirname, 'data', f);
   if (fs.existsSync(src)) fs.copyFileSync(src, path.join(SITE, 'data', f));
 });

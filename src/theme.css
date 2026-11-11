@@ -635,3 +635,8 @@ input[type=checkbox], input[type=radio] { accent-color: var(--brand); width: 16p
 .lrow.rec { grid-template-columns: minmax(0, 1.6fr) 1fr 1.5fr 118px; }
 .lrow.rec > span:last-child { white-space: nowrap; }
 @media (max-width: 860px) { .lrow.rec { grid-template-columns: 1fr 1fr; } .lrow.rec > .bar-mini { display: none; } }
+
+/* ---------- Job board polish ---------- */
+.callout { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; margin-bottom: 18px; padding: 16px 18px; background: var(--brand-soft); border: 1px solid var(--brand-line); border-radius: var(--r-lg); }
+.callout p { margin-top: 2px; }
+.tkt-org .src-link { position: relative; z-index: 2; color: var(--brand-ink); font-weight: 550; text-decoration: underline; text-underline-offset: 2px; }

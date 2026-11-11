@@ -3,10 +3,11 @@
    ============================================================ */
 'use strict';
 
-const VIEWS = { home: viewHome, explore: viewOpps, placements: viewPlacements, resume: viewResume, track: viewTrack, profile: viewProfile, prepare: viewPrepare, playbook: viewPlaybook };
-const TITLES = { home: 'Home', explore: 'Opportunities', placements: 'Placements', resume: 'Resume', track: 'Applications', profile: 'Profile', prepare: 'Prepare', playbook: 'Playbook' };
+const VIEWS = { assistant: viewAssistant, roadmap: viewRoadmap, home: viewHome, explore: viewOpps, placements: viewPlacements, resume: viewResume, track: viewTrack, profile: viewProfile, prepare: viewPrepare, playbook: viewPlaybook };
+const TITLES = { assistant: 'Assistant', roadmap: 'Skill roadmap', home: 'Home', explore: 'Opportunities', placements: 'Placements', resume: 'Resume', track: 'Applications', profile: 'Profile', prepare: 'Prepare', playbook: 'Playbook' };
 const NAV_ITEMS = [['home', 'Home', 'home'], ['explore', 'Opportunities', 'search'], ['placements', 'Placements', 'target'], ['resume', 'Resume', 'file'], ['track', 'Applications', 'board']];
-const NAV_GROUPS = [['', NAV_ITEMS]];
+const MORE_ITEMS = [['roadmap', 'Skill roadmap', 'map'], ['assistant', 'Assistant', 'send'], ['playbook', 'Where to apply', 'external']];
+const NAV_GROUPS = [['', NAV_ITEMS], ['More', MORE_ITEMS]];
 const TABBAR = NAV_ITEMS;
 const STAGE_NAV = [];
 
@@ -38,7 +39,7 @@ function renderView(r) {
   const v = $('#view');
   v.className = 'enter';
   v.innerHTML = VIEWS[r.name](r.arg);
-  document.title = `${TITLES[r.name]} · HITAM Opportunities`;
+  document.title = `${TITLES[r.name]} · HITAM Opportunities Intelligence`;
   window.scrollTo(0, 0);
   renderNav();
   if (r.name === 'assistant') { const c = $('#chat'); if (c) c.scrollTop = c.scrollHeight; }
@@ -75,7 +76,7 @@ function shellHTML() {
   return `
 <div class="app">
   <aside class="side" aria-label="Main navigation">
-    <a class="brand" href="#/home" aria-label="HITAM Opportunities, campus">${BRAND_MARK}<span class="brand-t"><b>HITAM</b><span>Opportunities</span></span></a>
+    <a class="brand" href="#/home" aria-label="HITAM Opportunities, campus">${BRAND_MARK}<span class="brand-t"><b>HITAM</b><span>Opportunities Intelligence</span></span></a>
     <nav class="nav" id="nav"></nav>
     <div class="me" id="me"></div>
   </aside>
@@ -153,7 +154,7 @@ function renderGate() {
          <p class="gate-small">Use your <b>roll-number@hitam.org</b> Google account. Other emails are refused.</p>`;
   $('#gate').innerHTML = `<div class="gate">
     <section class="gate-l">
-      <a class="brand" aria-label="HITAM Opportunities">${BRAND_MARK}<span class="brand-t"><b>HITAM</b><span>Opportunities</span></span></a>
+      <a class="brand" aria-label="HITAM Opportunities">${BRAND_MARK}<span class="brand-t"><b>HITAM</b><span>Opportunities Intelligence</span></span></a>
       <div class="gate-copy"><h1>Every opportunity at HITAM, <span>in one place.</span></h1>
       <p>Campus drives, hackathons and internships, ranked for your branch and year. Upload your resume once and see exactly what to fix.</p>
       <div class="gate-proof">${gateProof()}</div></div>
@@ -325,11 +326,17 @@ const ACTIONS = {
   'pb-mine': el => { PB.mine = el.checked; rerender(); },
   'notice-read': () => { const t = $('#notice-in'); NOTICE.text = t ? t.value : ''; if (!NOTICE.text.trim()) { toast('Paste a notice first'); return; } NOTICE.parsed = parseNotice(NOTICE.text); rerender(); },
   'notice-clear': () => { NOTICE.text = ''; NOTICE.parsed = null; rerender(); },
-  'op-sort': el => { OP.sort = el.value; refreshOps(); },
-  'op-mine': el => { OP.mine = el.checked; refreshOps(); },
-  'op-paid': el => { OP.paid = el.checked; refreshOps(); },
-  'op-remote': el => { OP.remote = el.checked; refreshOps(); },
-  'op-all': () => { OP.mine = false; rerender(); },
+  'op-sort': el => { OP.sort = el.value; OP.limit = OP_PAGE; refreshOps(); },
+  'op-mine': el => { OP.mine = el.checked; OP.limit = OP_PAGE; refreshOps(); },
+  'op-paid': el => { OP.paid = el.checked; OP.limit = OP_PAGE; refreshOps(); },
+  'op-remote': el => { OP.remote = el.checked; OP.limit = OP_PAGE; refreshOps(); },
+  'op-all': () => { OP.mine = false; OP.limit = OP_PAGE; rerender(); },
+  'op-city': el => { OP.city = el.dataset.id; OP.limit = OP_PAGE; rerender(); },
+  'op-more': () => { OP.limit += OP_PAGE; refreshOps(); },
+  'cdc-read': () => { const t = $('#cdc-in'); CDCIMP.text = t ? t.value : ''; if (!CDCIMP.text.trim()) { toast('Paste the copied CDC page first'); return; } CDCIMP.res = parseCdcText(CDCIMP.text); rerender(); const d = $('#notice-details'); if (d) { d.open = true; } },
+  'cdc-clear': () => { CDCIMP.text = ''; CDCIMP.res = null; rerender(); },
+  'cdc-add': () => { addCdcItems(); },
+  'go-import': () => { setTimeout(() => ACTIONS['op-notice'](), 400); },
   'op-notice': () => { const d = $('#notice-details'); if (d) { d.open = true; d.scrollIntoView({ behavior: 'smooth', block: 'center' }); } },
   'pl-branch': el => { PL.branch = el.dataset.id; rerender(); },
   'f-sort': el => { setFilters({ sort: el.value }); refreshResults(); },
@@ -422,6 +429,7 @@ function onInput(e) {
     if (d.in === 'name') { const av = $('.avatar'); if (av) av.textContent = initial(S.profile); }
   } else if (d.inOp) {
     OP.q = el.value;
+    OP.limit = OP_PAGE;
     refreshOps();
   } else if (d.inFilter) {
     setFilters({ [d.inFilter]: el.value });
@@ -518,6 +526,12 @@ function bindDnD() {
 
 /* ---------- Live jobs ---------- */
 function loadLive() {
+  const pe = document.getElementById('programs-data');
+  if (pe) { try { setProgramsData(JSON.parse(pe.textContent)); } catch (err) { /* run without programmes */ } }
+  if (/^https?:$/.test(location.protocol)) {
+    fetch('data/programs.json', { cache: 'no-store' }).then(r => (r.ok ? r.json() : null)).then(d => { if (d && setProgramsData(d)) { buildTicker(); rerender(); } }).catch(() => {});
+    fetch('data/remote.json', { cache: 'no-store' }).then(r => (r.ok ? r.json() : null)).then(d => { if (d && setLiveData(d, 'remote')) { buildTicker(); rerender(); } }).catch(() => {});
+  }
   const ce = document.getElementById('campus-data');
   if (ce) { try { setCampusData(JSON.parse(ce.textContent)); } catch (err) { /* run without campus snapshot */ } }
   if (/^https?:$/.test(location.protocol)) fetch('data/campus.json', { cache: 'no-store' }).then(r => (r.ok ? r.json() : null)).then(d => { if (d && (!CAMPUS || String(d.generatedAt) > String(CAMPUS.generatedAt)) && setCampusData(d) && current.name === 'campus') rerender(); }).catch(() => {});

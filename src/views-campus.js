@@ -100,7 +100,7 @@ function addNoticeListing(form) {
     skills: p.skills.filter(s => SKILLS.includes(s)).length ? p.skills.filter(s => SKILLS.includes(s)) : ['Problem Solving'],
     lvl: 1, years: p.years, br: p.br, mode: p.mode, pay: p.pay, minCgpa: Number.isFinite(cg) ? cg : undefined,
     dur: type === 'Placement' ? 'Full-time' : 'See notice', hrs: 0, track: S.profile.track ? [S.profile.track] : ['sw'],
-    tags: ['From a campus notice'], desc: NOTICE.text.slice(0, 1200), applyUrl: url || undefined, city: 'HITAM'
+    postedAt: new Date().toISOString(), tags: ['From a campus notice'], desc: NOTICE.text.slice(0, 1200), applyUrl: url || undefined, city: 'HITAM'
   };
   NOTICE.text = ''; NOTICE.parsed = null;
   if (AUTH.state === 'signedin') {

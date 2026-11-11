@@ -8,7 +8,7 @@ const ROOT = path.join(__dirname, 'dist');
 const PORT = Number(process.env.PORT) || 5177;
 
 http.createServer((req, res) => {
-  const dataFile = { '/data/jobs.json': 'jobs.json', '/data/campus.json': 'campus.json' }[req.url.split('?')[0]];
+  const dataFile = { '/data/jobs.json': 'jobs.json', '/data/campus.json': 'campus.json', '/data/remote.json': 'remote.json' }[req.url.split('?')[0]];
   if (dataFile) {
     fs.readFile(path.join(__dirname, 'data', dataFile), (err, buf) => {
       if (err) { res.writeHead(404); res.end('{}'); return; }

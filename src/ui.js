@@ -60,12 +60,12 @@ function segMeter(score) {
 function dueBadge(r, o) {
   if (!Number.isFinite(r.dl)) {
     const ago = o ? postedDaysAgo(o) : null;
-    const isNew = o && o.firstSeen && LIVE.meta && o.firstSeen === (LIVE.meta.generatedAt || '').slice(0, 10);
+    const isNew = ago !== null && ago <= 1;
     return `<span class="due fresh ${isNew ? 'new' : ''}" title="Open until filled">${isNew ? 'New today' : esc(freshLabel(ago))}</span>`;
   }
   return `<span class="due ${urgency(r.dl)}" title="${esc(countdownLong(r.dl))}">${countdown(r.dl)}</span>`;
 }
-const sourcePill = o => (o.live ? '<span class="pill live" title="From the company’s official careers feed">Live</span>' : o.custom ? '<span class="pill gold">Posted by you</span>' : '<span class="pill" title="Example listing shown in local preview only">Example</span>');
+const sourcePill = o => (o.live ? '<span class="pill live" title="From a live job posting">Live</span>' : o.program ? '<span class="pill ok" title="Official programme with a verified date">Official</span>' : o.custom || o.shared ? `<span class="pill acc" title="On the HITAM board">${o.tags && o.tags[0] === 'From CDC Explorer' ? 'CDC' : 'HITAM'}</span>` : '<span class="pill" title="Example listing shown in local preview only">Example</span>');
 const applyBtn = (o, cls = 'btn sm acc') => (o.applyUrl ? `<a class="${cls}" href="${esc(o.applyUrl)}" target="_blank" rel="noopener noreferrer">Apply${icon('external')}</a>` : '');
 
 function skillTags(o, r, max = 4) {
@@ -83,7 +83,7 @@ function ticket(o, r, i = 0) {
   <div class="tkt-main">
     <div class="tkt-top"><span class="tcode">${TYPE_CODE[o.type]}</span><span class="ttype">${o.type}</span>${sourcePill(o)}${dueBadge(r, o)}</div>
     <h3><button class="tkt-title" data-act="open" data-id="${o.id}">${esc(o.title)}</button></h3>
-    <div class="tkt-org">${esc(o.org)}</div>
+    <div class="tkt-org">${esc(o.org)}${o.remoteSource ? ' · via <a class="src-link" href="https://himalayas.app/jobs" target="_blank" rel="noopener noreferrer">Himalayas</a>' : ''}</div>
     <ul class="tkt-meta"><li>${icon('pin')}${o.city ? esc(o.city) + ' · ' : ''}${o.mode}</li><li>${icon('rupee')}${esc(payLabel(o.pay))}</li><li>${icon('clock')}${esc(o.dur)}</li></ul>
     <div class="tkt-skills">${skillTags(o, r)}</div>
     <div class="tkt-act">

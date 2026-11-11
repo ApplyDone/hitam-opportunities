@@ -11,6 +11,7 @@ const path = require('node:path');
 const { ADAPTERS } = require('./sources.js');
 const { normalizeJob, dedupe, mergeSeen } = require('./normalize.js');
 const { collectCampus } = require('./campus.js');
+const { collectHimalayas } = require('./himalayas.js');
 
 const ROOT = path.join(__dirname, '..');
 const DATA = path.join(ROOT, 'data');
@@ -83,9 +84,23 @@ async function main() {
   sources.filter(s => !s.ok).forEach(s => console.log(`  FAILED ${s.name} (${s.ats}): ${s.error}`));
   console.log(`Raw jobs: ${Object.values(reasons).reduce((a, b) => a + b, 0)}  kept: ${out.counts.total}  filter reasons: ${JSON.stringify(reasons)}`);
   console.log(`Hyderabad: ${out.counts.hyderabad}  internships: ${out.counts.internships}  new today: ${out.counts.newToday}  companies: ${out.counts.companies}`);
+  let remote = null;
+  try {
+    const r = await collectHimalayas();
+    remote = { generatedAt: new Date().toISOString(), counts: { total: r.jobs.length, internships: r.jobs.length, companies: new Set(r.jobs.map(j => j.org)).size }, jobs: r.jobs.map(j => ({ ...j, firstSeen: today })) };
+    console.log(`Remote internships (Himalayas): fetched ${r.fetched}, kept ${r.jobs.length}`);
+  } catch (err) { console.log(`Remote internships FAILED: ${err.message}`); }
+  let programs = null;
+  try {
+    const raw = JSON.parse(fs.readFileSync(path.join(__dirname, 'programs.json'), 'utf8'));
+    programs = raw.filter(p => p.rolling || (p.deadline && p.deadline >= today) || (!p.deadline && p.startDate && p.startDate >= today));
+    console.log(`Programmes: ${programs.length} current of ${raw.length}`);
+  } catch (err) { console.log(`Programmes not loaded: ${err.message}`); }
   let campus = null;
   try { campus = await collectCampus(); console.log(`Campus: ${campus.news.length} official posts, ${campus.placements.stats.offers} placement offers`); } catch (err) { console.log(`Campus collection FAILED: ${err.message}`); }
   if (DRY) return;
+  if (remote) fs.writeFileSync(path.join(DATA, 'remote.json'), JSON.stringify(remote));
+  if (programs) fs.writeFileSync(path.join(DATA, 'programs.json'), JSON.stringify(programs));
   if (campus) { fs.mkdirSync(DATA, { recursive: true }); fs.writeFileSync(path.join(DATA, 'campus.json'), JSON.stringify(campus)); }
   fs.mkdirSync(DATA, { recursive: true });
   fs.writeFileSync(path.join(DATA, 'jobs.json'), JSON.stringify(out));

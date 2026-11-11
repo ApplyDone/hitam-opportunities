@@ -3,3 +3,5 @@ dist/
 site/
 .claude/
 *.log
+# Himalayas terms: show on our site only, never redistribute. Published with the site build, not stored in git.
+data/remote.json
