@@ -1,9 +1,7 @@
 HITAM Opportunities
-*16 new openings today* (2026-11-11)
+*Open roles this week* (2026-11-12)
 Hyderabad + India-remote, internships and 0–2 years only.
 
-• Applications Dev Engineer — ServiceNow, Hyderabad
-  https://jobs.smartrecruiters.com/ServiceNow/744000161074019
 • [Intern] Product Management Intern — Rubrik, Bangalore
   https://www.rubrik.com/company/careers/departments/job.8345283?gh_jid=8345283
 • [Intern] AI Researcher Intern — HackerRank, Onsite in Bangalore
@@ -30,8 +28,6 @@ Hyderabad + India-remote, internships and 0–2 years only.
   https://job-boards.greenhouse.io/cloudsek/jobs/6115382004
 • [Intern] Software Engineer, Intern — Stripe, Bengaluru
   https://stripe.com/jobs/search?gh_jid=8031833
-• [Intern] UX Design Intern — Hevo Data, Bangalore
-  https://jobs.lever.co/hevodata/433ffdef-3125-48ed-a131-52c697c321ee
 • [Intern] UX Design - Intern — Glance, Bengaluru
   https://job-boards.greenhouse.io/glance/jobs/7916115
 
